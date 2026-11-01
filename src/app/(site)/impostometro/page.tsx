@@ -13,30 +13,30 @@ const PASSOS = [
   },
   {
     n: "02",
-    titulo: "Projeção do período aberto",
+    titulo: "Projeção do período sem dado oficial",
     texto:
       "Meses ainda não divulgados usam o mesmo mês do ano anterior, multiplicado pelo crescimento médio de cada tributo no ano até aqui.",
   },
   {
     n: "03",
-    titulo: "Contador em tempo real",
+    titulo: "Contador em tempo real (projeção)",
     texto:
-      "O valor exibido é a base oficial mais a taxa por segundo do mês corrente vezes o tempo decorrido, recalculado no navegador. É uma estimativa.",
+      "O contador é a base oficial mais a taxa por segundo do mês corrente vezes o tempo decorrido, recalculado no navegador. É uma projeção: nenhuma fonte pública informa a arrecadação do instante. Os números do bloco “Dados oficiais” não usam projeção.",
   },
 ];
 
 export default async function Page() {
-  const todas = await carregarImpostometro();
-  const dados = todas.federal;
+  const completo = await carregarImpostometro();
+  const dados = completo.projecao.federal;
   return (
     <>
       <h1>Impostômetro</h1>
       <p className="lead">
-        Estimativa em tempo real dos tributos federais e estaduais arrecadados em {dados?.ano ?? "2026"}, calculada a
-        partir de dados oficiais da Receita Federal e do Tesouro Nacional.
+        Arrecadação oficial dos tributos federais e estaduais em {dados?.ano ?? "2026"}, com recortes por mês e
+        bimestre, e uma projeção em tempo real, separada e identificada. Fontes: Receita Federal e Tesouro Nacional.
       </p>
       {dados ? (
-        <PainelImpostometro todas={todas} />
+        <PainelImpostometro completo={completo} />
       ) : (
         <div className="card">Ainda não há dados de arrecadação carregados.</div>
       )}
@@ -56,8 +56,9 @@ export default async function Page() {
           Federal: receitas administradas pela Receita Federal (impostos, contribuições e receita previdenciária).
           Estadual: impostos e taxas (receita realizada) dos estados e do DF; o Total soma as duas esferas sem ajustar
           eventual sobreposição entre elas. Os dados estaduais saem com mais atraso que os federais, então o Total
-          usa só o período que as duas esferas já divulgaram e projeta o restante. Tributos municipais ainda não têm
-          fonte automatizada. A variação real (IPCA) existe só para a esfera federal, calculada pela própria Receita.
+          usa só o período que as duas esferas já divulgaram e projeta o restante. Não inclui tributos municipais
+          (ISS, IPTU etc.): o Tesouro Nacional publica esses dados de forma incompleta, e um total parcial poderia ser
+          confundido com o total do país. A variação real (IPCA) existe só para a esfera federal, calculada pela própria Receita.
           População: estimativa do IBGE.
         </p>
       </section>

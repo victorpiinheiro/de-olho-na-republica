@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import type { EsferaTela, SerieOficial } from "@/lib/oficial";
 import { montarSerie, variacaoReal, type LinhaArrecadacao, type MesTotal } from "@/lib/impostometro";
 
 export interface DadosImpostometro {
@@ -14,7 +15,7 @@ export interface DadosImpostometro {
   linhasPorUf?: Record<string, LinhaArrecadacao[]>;
 }
 
-export type EsferaTela = "total" | "federal" | "estadual";
+export type { EsferaTela };
 export type ImpostometroPorEsfera = Record<EsferaTela, DadosImpostometro | null>;
 
 interface Base {
@@ -30,9 +31,17 @@ function montar(linhas: LinhaArrecadacao[], { ano, populacao, geradoEm }: Base, 
   return { ano, ...serie, populacao, variacaoReal: comVariacaoReal ? variacaoReal(linhas, ano) : null, geradoEm };
 }
 
-// Federal (Receita) e Estadual (Siconfi). Total = soma das duas. Municipal ainda não tem fonte.
-export async function carregarImpostometro(): Promise<ImpostometroPorEsfera> {
-  const vazio = { total: null, federal: null, estadual: null };
+// Federal (Receita) e Estadual (Siconfi). Total = soma das duas. Município fora de propósito: ver CLAUDE.md.
+export interface ImpostometroCompleto {
+  projecao: ImpostometroPorEsfera;
+  oficial: { ano: number; series: SerieOficial[]; populacao: number | null };
+}
+
+export async function carregarImpostometro(): Promise<ImpostometroCompleto> {
+  const vazio: ImpostometroCompleto = {
+    projecao: { total: null, federal: null, estadual: null },
+    oficial: { ano: new Date().getFullYear(), series: [], populacao: null },
+  };
   const recente = await db.arrecadacao.findFirst({
     where: { esfera: "FEDERAL", estimado: false },
     orderBy: [{ ano: "desc" }, { mes: "desc" }],
@@ -74,5 +83,27 @@ export async function carregarImpostometro(): Promise<ImpostometroPorEsfera> {
     dadosFederal && dadosEstadual
       ? montar([...federal, ...estadual], base, false, Math.min(dadosFederal.ultimoMesOficial, dadosEstadual.ultimoMesOficial))
       : null;
-  return { total: dadosTotal, federal: dadosFederal, estadual: dadosEstadual };
+
+  // Só o que a fonte publicou (sem projeção), por esfera/UF/tributo/ano, para os recortes de mês e bimestre.
+  const mapa = new Map<string, SerieOficial>();
+  for (const r of rows) {
+    if (r.estimado) continue;
+    const chave = `${r.esfera}|${r.uf}|${r.tributo}|${r.ano}`;
+    const serie = mapa.get(chave) ?? {
+      esfera: r.esfera as SerieOficial["esfera"],
+      uf: r.uf,
+      tributo: r.tributo,
+      ano: r.ano,
+      valores: Array<number | null>(12).fill(null),
+      reais: Array<number | null>(12).fill(null),
+    };
+    serie.valores[r.mes - 1] = Number(r.valor);
+    serie.reais[r.mes - 1] = r.valorReal === null ? null : Number(r.valorReal);
+    mapa.set(chave, serie);
+  }
+
+  return {
+    projecao: { total: dadosTotal, federal: dadosFederal, estadual: dadosEstadual },
+    oficial: { ano, series: [...mapa.values()], populacao: base.populacao },
+  };
 }

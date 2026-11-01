@@ -128,7 +128,11 @@ GET /proposicoes/{id}/autores
 - valor = base oficial acumulada + taxa por segundo × tempo decorrido
 - meses ainda não divulgados = mesmo mês do ano anterior × crescimento médio
 - exibir sempre como "estimativa", com a metodologia na página
-- começar só pelos tributos federais
+- esferas: Federal (Receita, mensal) e Estadual (Siconfi/RREO, bimestral, por UF). Total = Federal + Estadual
+- NÃO incluir Municipal: o RREO municipal sai incompleto (~60% dos municípios, ~90% da população, numa amostra
+  de 40) e exige 5.570 chamadas por bimestre. Um total parcial seria lido como o total do país. Só reavaliar com
+  dado completo (ex.: DCA anual do Tesouro, ainda não sondada)
+- dados oficiais e projeção ficam em blocos separados; o contador é sempre rotulado "projeção"
 
 **Resumo das leis:**
 - padrão: campo `ementa` oficial
@@ -175,9 +179,9 @@ Regras:
 - Alvos de toque ≥ 44px; contraste de texto ≥ 4.5:1
 
 ## Telas
-1. **Impostômetro**: contador grande animado, filtro por esfera (Total/Federal/Estadual/Municipal),
-   KPIs (hoje, mês, por habitante, variação real), barras mensais (último mês "estimado" com cor mais clara),
-   barras por tributo, bloco de metodologia
+1. **Impostômetro**: contador grande animado, filtro por esfera (Total/Federal/Estadual) e por UF,
+   bloco "Dados oficiais" (recorte por mês/bimestre/acumulado, filtro de tributo, KPIs, barras, por tributo, sem projeção)
+   e bloco "Projeção em tempo real" (contador animado, rotulado como projeção), bloco de metodologia
 2. **Parlamentares**: alternância Câmara/Senado, busca + filtros (UF, partido, ordenação), KPIs,
    tabela ranqueada por gasto com mini-barra, paginação
 3. **Perfil do parlamentar**: cabeçalho, KPIs (cota usada × limite, notas, presença, proposições),
