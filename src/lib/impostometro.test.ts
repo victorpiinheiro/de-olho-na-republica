@@ -3,6 +3,7 @@ import {
   acumuladoEm,
   arrecadadoHoje,
   inicioDoDia,
+  montarSerie,
   inicioDoMes,
   mesCorrente,
   projetarMeses,
@@ -117,5 +118,39 @@ describe("variacaoReal", () => {
   it("ignora meses estimados e devolve null sem base", () => {
     expect(variacaoReal([com(2026, 1, 50, { estimado: true })], 2026)).toBeNull();
     expect(variacaoReal([com(2026, 1, 50)], 2026)).toBeNull();
+  });
+});
+
+describe("montarSerie", () => {
+  const l = (tributo: string, mes: number, valor: number, estimado = false) => ({ tributo, ano: 2026, mes, valor, estimado, valorReal: null });
+  const doze = (tributo: string, valor: number, oficiaisAte: number) =>
+    Array.from({ length: 12 }, (_, i) => l(tributo, i + 1, valor, i + 1 > oficiaisAte));
+
+  it("soma UFs, marca o mês estimado e acumula por tributo só até o último oficial", () => {
+    const sp = doze("Impostos estaduais", 100, 8);
+    const mg = doze("Impostos estaduais", 10, 8);
+    const s = montarSerie([...sp, ...mg], 2026)!;
+    expect(s.ultimoMesOficial).toBe(8);
+    expect(s.meses[0].valor).toBe(110);
+    expect(s.meses[8].estimado).toBe(true);
+    expect(s.porTributo).toEqual([{ tributo: "Impostos estaduais", valor: 880 }]);
+  });
+
+  it("tirar uma UF muda o total (ver sem SP)", () => {
+    const sp = doze("Impostos estaduais", 100, 8);
+    const mg = doze("Impostos estaduais", 10, 8);
+    expect(montarSerie([...sp, ...mg], 2026)!.meses[0].valor).toBe(110);
+    expect(montarSerie(mg, 2026)!.meses[0].valor).toBe(10);
+  });
+
+  it("respeita o limite de mês ao somar fontes com defasagens diferentes", () => {
+    const s = montarSerie([...doze("A", 1, 9), ...doze("B", 1, 8)], 2026, 8)!;
+    expect(s.ultimoMesOficial).toBe(8);
+    expect(s.porTributo.map((t) => t.valor)).toEqual([8, 8]);
+  });
+
+  it("devolve null sem mês oficial ou com série incompleta", () => {
+    expect(montarSerie(doze("A", 1, 0), 2026)).toBeNull();
+    expect(montarSerie(doze("A", 1, 8).slice(0, 11), 2026)).toBeNull();
   });
 });

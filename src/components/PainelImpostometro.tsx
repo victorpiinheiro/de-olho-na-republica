@@ -10,9 +10,11 @@ import {
   arrecadadoHoje,
   inicioDoMes,
   mesCorrente,
+  montarSerie,
   taxaPorSegundo,
 } from "@/lib/impostometro";
-import type { DadosImpostometro } from "@/lib/queries/impostometro";
+import { nomeUf } from "@/lib/ufs";
+import type { EsferaTela, ImpostometroPorEsfera } from "@/lib/queries/impostometro";
 
 const DIA_MS = 86_400_000;
 const centavos = (n: number) => n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -29,10 +31,38 @@ function useAgora(inicial: number): number {
 }
 
 // `geradoEm` vem do servidor: o primeiro render do navegador usa o mesmo valor (sem erro de hidratação).
-export function PainelImpostometro({ dados }: { dados: DadosImpostometro }) {
-  const { ano, meses, ultimoMesOficial, porTributo, populacao, variacaoReal, geradoEm } = dados;
-  const [esfera, setEsfera] = useState<"total" | "federal">("total");
-  const agora = useAgora(geradoEm);
+const ROTULO_ESFERA: Record<EsferaTela, string> = {
+  total: "tributos federais e estaduais",
+  federal: "tributos federais",
+  estadual: "tributos estaduais",
+};
+
+export function PainelImpostometro({ todas }: { todas: ImpostometroPorEsfera }) {
+  const [esfera, setEsfera] = useState<EsferaTela>(todas.total ? "total" : "federal");
+  // UFs desligadas no filtro da aba Estadual (vazio = todas).
+  const [ufsOff, setUfsOff] = useState<ReadonlySet<string>>(new Set());
+  const completos = todas[esfera] ?? todas.federal;
+  const agora = useAgora(completos?.geradoEm ?? 0);
+  if (!completos) return null;
+
+  const porUf = esfera === "estadual" ? completos.linhasPorUf : undefined;
+  const ufs = porUf ? Object.keys(porUf).sort() : [];
+  const filtrando = ufsOff.size > 0 && ufs.length > 0;
+  const recorte = filtrando && porUf ? montarSerie(ufs.filter((u) => !ufsOff.has(u)).flatMap((u) => porUf[u]), completos.ano) : null;
+  const dados = recorte ? { ...completos, ...recorte } : completos;
+  const alternarUf = (uf: string) => {
+    const novo = new Set(ufsOff);
+    if (novo.has(uf)) novo.delete(uf);
+    else if (ufs.length - novo.size > 1) novo.add(uf); // sempre sobra ao menos um estado
+    setUfsOff(novo);
+  };
+  const selecionados = ufs.length - ufsOff.size;
+  const escopo = !filtrando
+    ? ROTULO_ESFERA[esfera]
+    : ufsOff.size <= 5
+      ? `tributos estaduais, sem ${[...ufsOff].sort().join(", ")}`
+      : `tributos de ${selecionados} estado${selecionados > 1 ? "s" : ""}`;
+  const { ano, meses, ultimoMesOficial, porTributo, populacao, variacaoReal } = dados;
 
   const acumulado = acumuladoEm(agora, ano, meses);
   const taxa = taxaPorSegundo(agora, ano, meses);
@@ -46,19 +76,48 @@ export function PainelImpostometro({ dados }: { dados: DadosImpostometro }) {
   return (
     <>
       <div className="alternancia" role="group" aria-label="Esfera">
-        <button type="button" className={`aba${esfera === "total" ? " aba-ativa" : ""}`} aria-pressed={esfera === "total"} onClick={() => setEsfera("total")}>
-          Total
-        </button>
-        <button type="button" className={`aba${esfera === "federal" ? " aba-ativa" : ""}`} aria-pressed={esfera === "federal"} onClick={() => setEsfera("federal")}>
-          Federal
-        </button>
-        <button type="button" className="aba aba-off" disabled title="Sem fonte de dados ainda">Estadual · em breve</button>
+        {(["total", "federal", "estadual"] as const).map((e) => (
+          <button
+            key={e}
+            type="button"
+            className={`aba${esfera === e ? " aba-ativa" : ""}${todas[e] ? "" : " aba-off"}`}
+            aria-pressed={esfera === e}
+            disabled={!todas[e]}
+            title={todas[e] ? undefined : "Dados ainda não carregados"}
+            onClick={() => setEsfera(e)}
+          >
+            {e === "total" ? "Total" : e === "federal" ? "Federal" : "Estadual"}
+          </button>
+        ))}
         <button type="button" className="aba aba-off" disabled title="Sem fonte de dados ainda">Municipal · em breve</button>
       </div>
 
+      {ufs.length > 0 && (
+        <div className="filtro-ufs" role="group" aria-label="Estados incluídos">
+          <div className="filtro-ufs-topo">
+            <span>Estados incluídos · {selecionados} de {ufs.length}</span>
+            <button type="button" className="link-botao" onClick={() => setUfsOff(new Set())} disabled={!filtrando}>Todos</button>
+          </div>
+          <div className="filtro-ufs-lista">
+            {ufs.map((uf) => (
+              <button
+                key={uf}
+                type="button"
+                className={`aba${ufsOff.has(uf) ? "" : " aba-ativa"}`}
+                aria-pressed={!ufsOff.has(uf)}
+                title={nomeUf(uf)}
+                onClick={() => alternarUf(uf)}
+              >
+                {uf}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <section className="card contador" aria-labelledby="titulo-contador">
         <div className="contador-rotulo" id="titulo-contador">
-          Arrecadado em {ano} · Brasil, tributos federais
+          Arrecadado em {ano} · Brasil, {escopo}
         </div>
         <div className="contador-linha">
           <div>
@@ -90,7 +149,7 @@ export function PainelImpostometro({ dados }: { dados: DadosImpostometro }) {
             nota={corrente.estimado ? "projeção do mês" : "arrecadação oficial do mês"}
           />
         )}
-        {populacao && <Kpi rotulo="Por habitante" valor={brlInteiro(acumulado / populacao)} nota="no ano, média" />}
+        {populacao && !filtrando && <Kpi rotulo="Por habitante" valor={brlInteiro(acumulado / populacao)} nota="no ano, média" />}
         {variacaoReal && (
           <Kpi
             rotulo="Variação real"

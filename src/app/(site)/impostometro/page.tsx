@@ -9,7 +9,7 @@ const PASSOS = [
     n: "01",
     titulo: "Dados oficiais",
     texto:
-      "Arrecadação mensal das receitas administradas pela Receita Federal, publicada no relatório “Análise da Arrecadação das Receitas Federais” e importada automaticamente.",
+      "Federal: arrecadação mensal da Receita Federal (relatório “Análise da Arrecadação das Receitas Federais”). Estadual: impostos e taxas dos 26 estados e do DF, no Relatório Resumido da Execução Orçamentária (RREO) do Tesouro Nacional, que é bimestral — cada bimestre é dividido em dois meses iguais. Tudo importado automaticamente.",
   },
   {
     n: "02",
@@ -26,16 +26,17 @@ const PASSOS = [
 ];
 
 export default async function Page() {
-  const dados = await carregarImpostometro();
+  const todas = await carregarImpostometro();
+  const dados = todas.federal;
   return (
     <>
       <h1>Impostômetro</h1>
       <p className="lead">
-        Estimativa em tempo real dos tributos federais arrecadados em {dados?.ano ?? "2026"}, calculada a partir dos dados
-        oficiais da Receita Federal.
+        Estimativa em tempo real dos tributos federais e estaduais arrecadados em {dados?.ano ?? "2026"}, calculada a
+        partir de dados oficiais da Receita Federal e do Tesouro Nacional.
       </p>
       {dados ? (
-        <PainelImpostometro dados={dados} />
+        <PainelImpostometro todas={todas} />
       ) : (
         <div className="card">Ainda não há dados de arrecadação carregados.</div>
       )}
@@ -52,9 +53,11 @@ export default async function Page() {
           ))}
         </ol>
         <p className="metodologia-nota">
-          Considera as receitas administradas pela Receita Federal (impostos, contribuições e receita previdenciária).
-          Não inclui tributos estaduais e municipais, que ainda não têm fonte de dados automatizada, nem as receitas
-          administradas por outros órgãos. Variação real calculada pela própria Receita, a preços constantes pelo IPCA.
+          Federal: receitas administradas pela Receita Federal (impostos, contribuições e receita previdenciária).
+          Estadual: impostos e taxas (receita realizada) dos estados e do DF; o Total soma as duas esferas sem ajustar
+          eventual sobreposição entre elas. Os dados estaduais saem com mais atraso que os federais, então o Total
+          usa só o período que as duas esferas já divulgaram e projeta o restante. Tributos municipais ainda não têm
+          fonte automatizada. A variação real (IPCA) existe só para a esfera federal, calculada pela própria Receita.
           População: estimativa do IBGE.
         </p>
       </section>

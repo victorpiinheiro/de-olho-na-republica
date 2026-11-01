@@ -19,7 +19,8 @@
     "sync:votacoes-senado": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-votacoes-senado.ts",
     "sync:proposicoes-senado": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-proposicoes-senado.ts",
     "sync:eleicoes": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-eleicoes.ts",
-    "sync:arrecadacao": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-arrecadacao.ts"
+    "sync:arrecadacao": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-arrecadacao.ts",
+    "sync:arrecadacao-estados": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-arrecadacao-estados.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

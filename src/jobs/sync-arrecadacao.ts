@@ -28,17 +28,17 @@ runJob("sync-arrecadacao", async () => {
 
   const operacoes = [
     ...oficiais.map((l) => {
-      const chave = { esfera: l.esfera, tributo: l.tributo, ano: l.ano, mes: l.mes };
+      const chave = { esfera: l.esfera, uf: "BR", tributo: l.tributo, ano: l.ano, mes: l.mes };
       return db.arrecadacao.upsert({
-        where: { esfera_tributo_ano_mes: chave },
+        where: { esfera_uf_tributo_ano_mes: chave },
         create: l,
         update: { valor: l.valor, estimado: false, valorReal: l.valorReal },
       });
     }),
     ...projecao.map((l) => {
-      const chave = { esfera: "FEDERAL" as const, tributo: l.tributo, ano: l.ano, mes: l.mes };
+      const chave = { esfera: "FEDERAL" as const, uf: "BR", tributo: l.tributo, ano: l.ano, mes: l.mes };
       return db.arrecadacao.upsert({
-        where: { esfera_tributo_ano_mes: chave },
+        where: { esfera_uf_tributo_ano_mes: chave },
         create: { ...chave, valor: l.valor, estimado: true, valorReal: null },
         update: { valor: l.valor, estimado: true, valorReal: null },
       });

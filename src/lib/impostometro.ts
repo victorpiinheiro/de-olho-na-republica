@@ -120,3 +120,32 @@ export function variacaoReal(linhas: LinhaArrecadacao[], ano: number): { variaca
   }
   return anterior > 0 ? { variacao: (atual / anterior - 1) * 100, ateMes: Math.max(...mesesAtual) } : null;
 }
+
+export interface Serie {
+  meses: MesTotal[];
+  ultimoMesOficial: number;
+  porTributo: { tributo: string; valor: number }[];
+}
+
+// Série do ano a partir das linhas (uma esfera, a soma delas ou um conjunto de UFs).
+// `limiteMes`: ao somar fontes com defasagens diferentes, só vale o que todas já divulgaram.
+// Null se não há mês oficial ou se a série não fecha os 12 meses (melhor não mostrar números parciais).
+export function montarSerie(linhas: LinhaArrecadacao[], ano: number, limiteMes = 12): Serie | null {
+  const ultimoMesOficial = Math.max(0, ...linhas.filter((l) => l.ano === ano && !l.estimado && l.mes <= limiteMes).map((l) => l.mes));
+  if (ultimoMesOficial === 0) return null;
+
+  const meses = totaisPorMes(linhas, ano);
+  if (meses.length !== 12) return null;
+
+  const porTributo = new Map<string, number>();
+  for (const l of linhas) {
+    if (l.ano === ano && !l.estimado && l.mes <= ultimoMesOficial) {
+      porTributo.set(l.tributo, (porTributo.get(l.tributo) ?? 0) + l.valor);
+    }
+  }
+  return {
+    meses,
+    ultimoMesOficial,
+    porTributo: [...porTributo].map(([tributo, valor]) => ({ tributo, valor })).sort((a, b) => b.valor - a.valor),
+  };
+}

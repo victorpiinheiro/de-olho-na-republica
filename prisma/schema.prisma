@@ -198,6 +198,9 @@ model ResultadoCandidato {
 model Arrecadacao {
   id        Int      @id @default(autoincrement())
   esfera    Esfera
+  // "BR" para o federal (série nacional); sigla da UF para o estadual.
+  // Não é nulo de propósito: NULL não conta como igual na chave única do Postgres.
+  uf        String   @default("BR")
   tributo   String
   ano       Int
   mes       Int
@@ -207,7 +210,7 @@ model Arrecadacao {
   // Valor a preços do último mês divulgado (IPCA, série da própria Receita). Nulo em estimativas.
   valorReal Decimal? @db.Decimal(18, 2)
 
-  @@unique([esfera, tributo, ano, mes])
+  @@unique([esfera, uf, tributo, ano, mes])
 }
 
 // Números únicos que a tela precisa e que não são séries mensais (ex.: população do Brasil).

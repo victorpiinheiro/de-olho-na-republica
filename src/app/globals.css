@@ -1419,3 +1419,43 @@ h2 {
   padding-top: 16px;
   border-top: 1px solid var(--border);
 }
+
+/* Impostômetro: filtro de estados da aba Estadual */
+.filtro-ufs {
+  margin-bottom: 16px;
+}
+
+.filtro-ufs-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.filtro-ufs .link-botao {
+  min-height: 44px;
+  padding: 0 8px;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.filtro-ufs .link-botao:disabled {
+  color: var(--text-2);
+  opacity: 0.6;
+}
+
+.filtro-ufs-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filtro-ufs-lista .aba {
+  min-width: 52px;
+  justify-content: center;
+  padding: 0 8px;
+}
