@@ -266,6 +266,14 @@ describe("toProposicaoSenado", () => {
     expect(toProposicaoSenado(tramitando, null)).toMatchObject({ virouLei: false, normaJuridica: null });
   });
 
+  it("dataLei vem da assinatura da norma, só quando virou lei", () => {
+    const lei = processo({ normaGerada: { dataAssinatura: "2023-06-14" } });
+    expect(toProposicaoSenado(lei, "Lei 14597/2023").dataLei?.toISOString()).toBe("2023-06-14T00:00:00.000Z");
+    expect(toProposicaoSenado(processo(), "Lei 1/2023").dataLei).toBeNull();
+    const tramitando = processo({ siglaSituacaoAtual: "ADR", normaGerada: { dataAssinatura: "2023-06-14" } });
+    expect(toProposicaoSenado(tramitando, null).dataLei).toBeNull();
+  });
+
   it("lei com veto parcial (TNJRVETO) é lei; veto total (VTDA) não é", () => {
     const vetoParcial = processo({
       situacaoAtual: "TRANSFORMADA EM NORMA JURÍDICA COM VETO PARCIAL",

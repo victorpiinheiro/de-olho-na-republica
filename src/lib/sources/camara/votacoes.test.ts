@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   classificarVotos,
+  extrairNorma,
   extrairNormaJuridica,
   proposicaoPrincipal,
   toAutores,
@@ -225,6 +226,17 @@ describe("extrairNormaJuridica", () => {
       t("Transformado na Lei Ordinária 14815/2024. DOU 16/01/2024."),
     ]);
     expect(r).toBe("Lei Ordinária 14815/2024");
+  });
+
+  it("devolve a data da tramitação que registra a norma (não a de hoje)", () => {
+    const r = extrairNorma([
+      tramitacaoSchema.parse({
+        dataHora: "2026-09-28T00:00",
+        descricaoTramitacao: "Transformação em Norma Jurídica",
+        despacho: "Transformado na Lei Ordinária 15524/2026. DOU 29/09/2026 PÁG 02 COL 02.",
+      }),
+    ]);
+    expect(r?.data?.toISOString()).toBe("2026-09-28T00:00:00.000Z");
   });
 
   it("sem nenhuma tramitação de norma devolve nulo", () => {

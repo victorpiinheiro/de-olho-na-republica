@@ -106,6 +106,7 @@ export const processoSchema = z.object({
   }),
   situacaoAtual: z.string().nullish(),
   siglaSituacaoAtual: z.string().nullish(),
+  normaGerada: z.object({ dataAssinatura: z.string().nullish() }).nullish(),
   autoriaIniciativa: z.array(autoriaSchema).nullish(),
 });
 export type ProcessoApi = z.infer<typeof processoSchema>;

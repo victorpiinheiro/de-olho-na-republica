@@ -3,16 +3,15 @@
 import { useState } from "react";
 import { Barra } from "@/components/Barra";
 import { Kpi } from "@/components/Kpi";
-import { brlGrande, MESES_COMPLETOS, pct } from "@/lib/format";
+import { brlGrande, MESES_COMPLETOS, pctFatia as percentual } from "@/lib/format";
 import type { FuncaoOrc, OrcamentoAno } from "@/lib/queries/orcamento";
 
 const ENCARGOS = "Encargos Especiais";
 
 // "FU10 - Administração Geral" é a administração geral DA função; a fonte prefixa para não repetir o nome.
 const nomeSubfuncao = (n: string) => n.replace(/^FU\d+ - /, "");
-const percentual = (parte: number, todo: number) => (todo > 0 ? pct((parte / todo) * 100) : "—");
 
-function Funcao({ f, total, maximo }: { f: FuncaoOrc; total: number; maximo: number }) {
+function Funcao({ f, total }: { f: FuncaoOrc; total: number }) {
   const liq = f.liquidado ?? 0;
   const subs = f.subfuncoes.filter((s) => (s.liquidado ?? 0) > 0).sort((a, b) => (b.liquidado ?? 0) - (a.liquidado ?? 0));
   return (
@@ -21,7 +20,7 @@ function Funcao({ f, total, maximo }: { f: FuncaoOrc; total: number; maximo: num
         <summary>
           <span className="orc-nome">{f.nome}</span>
           <span className="orc-valor">{brlGrande(liq)} · {percentual(liq, total)}</span>
-          <span className="orc-barra"><Barra valor={liq} maximo={maximo} /></span>
+          <span className="orc-barra"><Barra valor={liq} maximo={total} /></span>
         </summary>
         <div className="orc-detalhe">
           <p className="orc-nota">
@@ -66,7 +65,6 @@ export function PainelOrcamento({ anos }: { anos: OrcamentoAno[] }) {
   const o = anos.find((a) => a.ano === ano) ?? anos[0];
 
   const executadas = o.funcoes.filter((f) => (f.liquidado ?? 0) > 0).sort((a, b) => (b.liquidado ?? 0) - (a.liquidado ?? 0));
-  const maximo = executadas[0]?.liquidado ?? 0;
   const encargos = o.funcoes.find((f) => f.nome === ENCARGOS);
   const reserva = o.funcoes.find((f) => (f.liquidado ?? 0) === 0 && (f.dotacao ?? 0) > 0);
   const fimMes = MESES_COMPLETOS[o.bimestre * 2 - 1];
@@ -101,7 +99,7 @@ export function PainelOrcamento({ anos }: { anos: OrcamentoAno[] }) {
         <p className="nota-grafico">Clique numa área para ver as subfunções. Percentual sobre o total executado.</p>
         <ul className="orc-lista">
           {executadas.map((f) => (
-            <Funcao key={f.nome} f={f} total={o.total.liquidado} maximo={maximo} />
+            <Funcao key={f.nome} f={f} total={o.total.liquidado} />
           ))}
         </ul>
         {reserva && (

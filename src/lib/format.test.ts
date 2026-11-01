@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { paraCsv } from "./csv";
-import { brlCompacto, brlGrande, brlInteiro, documentoFornecedor, milhoes, pct, pontos, rotuloCategoria } from "./format";
+import { brlCompacto, brlGrande, brlInteiro, documentoFornecedor, milhoes, pct, pctFatia, dataBrDia, pontos, rotuloCategoria } from "./format";
 import { nomeUf } from "./ufs";
 
 // toLocaleString usa espaço não separável entre "R$" e o número.
@@ -81,5 +81,25 @@ describe("brlGrande", () => {
     expect(norm(brlGrande(8.54e9))).toBe("R$ 8,5 bi");
     expect(norm(brlGrande(139.2e6))).toBe("R$ 139,2 mi");
     expect(norm(brlGrande(412_000))).toBe("R$ 412 mil");
+  });
+});
+
+describe("pctFatia", () => {
+  it("uma casa a partir de 1%", () => expect(pctFatia(45, 100)).toBe("45,0%"));
+  it("abaixo de 1% mostra até o primeiro dígito, para não parecer zero", () => {
+    expect(pctFatia(0.3, 100)).toBe("0,30%");
+    expect(pctFatia(0.04, 100)).toBe("0,040%");
+    expect(pctFatia(0.004, 100)).toBe("0,004%");
+    expect(pctFatia(0.0004, 100)).toBe("<0,001%");
+  });
+  it("zero de verdade continua zero, e total zero vira traço", () => {
+    expect(pctFatia(0, 100)).toBe("0,0%");
+    expect(pctFatia(5, 0)).toBe("—");
+  });
+});
+
+describe("dataBrDia", () => {
+  it("data só com dia não volta um dia no fuso de Brasília", () => {
+    expect(dataBrDia("2023-06-14T00:00:00.000Z")).toBe("14/06/2023");
   });
 });

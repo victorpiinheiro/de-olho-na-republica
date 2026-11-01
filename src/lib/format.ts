@@ -10,6 +10,9 @@ export const inteiro = (n: number) => n.toLocaleString("pt-BR");
 export const dataBr = (iso: string) =>
   new Date(iso).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
 
+// Datas só com dia (coluna DATE) ficam em 00:00 UTC; no fuso de Brasília cairiam no dia anterior.
+export const dataBrDia = (iso: string) => new Date(iso).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+
 export const brlInteiro = (n: number) =>
   n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
@@ -68,3 +71,14 @@ export const MESES_COMPLETOS = [
   "janeiro", "fevereiro", "março", "abril", "maio", "junho",
   "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
 ];
+
+// Fatia de um todo. Abaixo de 1% uma casa vira "0,0%" e parece que não houve nada:
+// mostra casas até aparecer o primeiro dígito diferente de zero.
+export function pctFatia(parte: number, todo: number): string {
+  if (todo <= 0) return "—";
+  const n = (parte / todo) * 100;
+  if (n <= 0 || n >= 0.95) return pct(n);
+  if (n < 0.001) return "<0,001%";
+  const casas = Math.min(3, Math.max(2, 1 - Math.floor(Math.log10(n))));
+  return `${n.toLocaleString("pt-BR", { minimumFractionDigits: casas, maximumFractionDigits: casas })}%`;
+}

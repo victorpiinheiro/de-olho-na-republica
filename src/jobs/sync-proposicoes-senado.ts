@@ -19,7 +19,7 @@ async function emParalelo<T>(itens: T[], n: number, fn: (item: T) => Promise<voi
 // número está fechado e fica de fora.
 runJob("sync-proposicoes-senado", async () => {
   const pendentes = await db.proposicao.findMany({
-    where: { casa: "SENADO", NOT: { virouLei: true, normaJuridica: { not: null } } },
+    where: { casa: "SENADO", NOT: { virouLei: true, normaJuridica: { not: null }, dataLei: { not: null } } },
     select: { idOrigem: true, virouLei: true },
   });
   const idPorNome = await mapaNomesSenadores();

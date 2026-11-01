@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Barra } from "@/components/Barra";
 import { Kpi } from "@/components/Kpi";
-import { brlGrande, brlInteiro, MESES, MESES_COMPLETOS, pct } from "@/lib/format";
+import { brlGrande, brlInteiro, MESES, MESES_COMPLETOS, pct, pctFatia } from "@/lib/format";
 import {
   calcular,
   granularidadesPermitidas,
@@ -206,9 +206,9 @@ export function PainelOficial({
               <li key={t.tributo}>
                 <div className="tributos-topo">
                   <span>{t.tributo}</span>
-                  <span>{Math.round((t.valor / totalTributos) * 100)}% · {brlGrande(t.valor)}</span>
+                  <span>{pctFatia(t.valor, totalTributos)} · {brlGrande(t.valor)}</span>
                 </div>
-                <Barra valor={t.valor} maximo={r.porTributo[0].valor} />
+                <Barra valor={t.valor} maximo={totalTributos} />
               </li>
             ))}
           </ul>

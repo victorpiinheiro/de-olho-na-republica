@@ -151,6 +151,11 @@ const SITUACOES_NORMA_JURIDICA = new Set(["TNJR", "TNJRVETO"]);
 export const viraNormaJuridica = (siglaSituacao: string | null | undefined) =>
   !!siglaSituacao && SITUACOES_NORMA_JURIDICA.has(siglaSituacao);
 
+const dataDia = (s: string | null | undefined): Date | null => {
+  const dia = s?.slice(0, 10);
+  return dia && /^\d{4}-\d{2}-\d{2}$/.test(dia) ? new Date(`${dia}T00:00:00Z`) : null;
+};
+
 export function toProposicaoSenado(p: ProcessoApi, normaJuridica: string | null) {
   return {
     casa: "SENADO" as const,
@@ -163,6 +168,7 @@ export function toProposicaoSenado(p: ProcessoApi, normaJuridica: string | null)
     situacao: p.situacaoAtual ? capitalizar(p.situacaoAtual) : null,
     virouLei: viraNormaJuridica(p.siglaSituacaoAtual),
     normaJuridica,
+    dataLei: viraNormaJuridica(p.siglaSituacaoAtual) ? dataDia(p.normaGerada?.dataAssinatura) : null,
     dataApresentacao: p.documento.dataApresentacao
       ? new Date(`${p.documento.dataApresentacao.slice(0, 10)}T00:00:00Z`)
       : null,

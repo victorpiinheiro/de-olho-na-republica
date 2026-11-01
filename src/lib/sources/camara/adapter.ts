@@ -177,10 +177,14 @@ export function toAutores(as: AutorApi[], idPorOrigem: Map<string, number>) {
 // Sem número no texto (acontece em MPV) devolve null: melhor vazio do que chute.
 const NORMA = /^(?:Transformad[oa] n[ao]\s+)?(Lei Ordinária|Lei Complementar|Emenda Constitucional|Decreto Legislativo|Lei)\s+(?:n[º°.]?\s*)?(\d[\d.]*\/\d{4})\b/i;
 
-export function extrairNormaJuridica(tramitacoes: TramitacaoApi[]): string | null {
+// A data é a da tramitação que registra a transformação em norma (dia da sanção).
+export function extrairNorma(tramitacoes: TramitacaoApi[]): { norma: string; data: Date | null } | null {
   for (const t of tramitacoes) {
     const m = NORMA.exec((t.despacho ?? "").trim());
-    if (m) return `${m[1]} ${m[2]}`;
+    if (m) return { norma: `${m[1]} ${m[2]}`, data: parseData(t.dataHora) };
   }
   return null;
 }
+
+export const extrairNormaJuridica = (tramitacoes: TramitacaoApi[]): string | null =>
+  extrairNorma(tramitacoes)?.norma ?? null;

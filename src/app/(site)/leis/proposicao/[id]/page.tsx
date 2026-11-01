@@ -84,6 +84,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           <h2>Linha do tempo</h2>
           <LinhaDoTempo
             apresentacaoIso={p.dataApresentacaoIso}
+            dataLeiIso={p.dataLeiIso}
             votacoes={votacoes}
             situacao={p.situacao}
             virouLei={p.virouLei}

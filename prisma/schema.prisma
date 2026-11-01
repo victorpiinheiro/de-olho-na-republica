@@ -87,6 +87,7 @@ model Proposicao {
   virouLei         Boolean   @default(false)
   normaJuridica    String?
   dataApresentacao DateTime? @db.Date
+  dataLei          DateTime? @db.Date
   atualizadoEm     DateTime  @updatedAt
 
   autores  Autor[]

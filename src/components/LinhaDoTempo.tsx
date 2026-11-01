@@ -1,4 +1,4 @@
-import { dataBr } from "@/lib/format";
+import { dataBr, dataBrDia } from "@/lib/format";
 import { rotuloResultado } from "@/lib/leis";
 import type { VotacaoDetalhe } from "@/lib/queries/leis";
 
@@ -8,12 +8,14 @@ const TEXTO_ESTADO = { nominal: "nominal", simbolica: "simbólica", secreta: "se
 // Não guardamos as tramitações completas (centenas de linhas por proposição).
 export function LinhaDoTempo({
   apresentacaoIso,
+  dataLeiIso,
   votacoes,
   situacao,
   virouLei,
   normaJuridica,
 }: {
   apresentacaoIso: string | null;
+  dataLeiIso: string | null;
   votacoes: VotacaoDetalhe[];
   situacao: string | null;
   virouLei: boolean;
@@ -23,7 +25,7 @@ export function LinhaDoTempo({
     <ol className="timeline">
       {apresentacaoIso && (
         <li>
-          <time>{dataBr(apresentacaoIso)}</time>
+          <time>{dataBrDia(apresentacaoIso)}</time>
           <span>Proposição apresentada</span>
         </li>
       )}
@@ -36,7 +38,7 @@ export function LinhaDoTempo({
         </li>
       ))}
       <li className="timeline-atual">
-        <time>Hoje</time>
+        <time>{virouLei ? (dataLeiIso ? dataBrDia(dataLeiIso) : "Data não informada") : "Situação atual"}</time>
         <span>
           <strong>{virouLei ? `Virou lei${normaJuridica ? ` · ${normaJuridica}` : ""}` : (situacao ?? "Em tramitação")}</strong>
         </span>

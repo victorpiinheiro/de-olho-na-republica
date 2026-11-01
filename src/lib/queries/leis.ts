@@ -188,6 +188,7 @@ export async function buscarLei(id: number) {
       normaJuridica: p.normaJuridica,
       urlInteiroTeor: p.urlInteiroTeor,
       dataApresentacaoIso: p.dataApresentacao ? p.dataApresentacao.toISOString() : null,
+      dataLeiIso: p.dataLei ? p.dataLei.toISOString() : null,
     },
     autores: p.autores.map((a) => ({
       nome: a.nome,
