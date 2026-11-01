@@ -1,7 +1,8 @@
-export type Aba = "todas" | "viraram-lei" | "aprovadas-camara" | "aprovadas-senado" | "rejeitadas";
+export type Aba = "todas" | "nominais" | "viraram-lei" | "aprovadas-camara" | "aprovadas-senado" | "rejeitadas";
 
 export const ABAS: { chave: Aba; rotulo: string; href: string }[] = [
   { chave: "todas", rotulo: "Todas", href: "/leis" },
+  { chave: "nominais", rotulo: "Com votos nominais", href: "/leis/nominais" },
   { chave: "viraram-lei", rotulo: "Viraram lei", href: "/leis/viraram-lei" },
   { chave: "aprovadas-camara", rotulo: "Aprovadas na Câmara", href: "/leis/aprovadas-camara" },
   { chave: "aprovadas-senado", rotulo: "Aprovadas no Senado", href: "/leis/aprovadas-senado" },
@@ -46,6 +47,10 @@ export function votacaoDestaque<T extends VotacaoResumo>(votacoes: T[]): T | nul
   return ordenadas.find((v) => estadoDe(v) === "nominal") ?? ordenadas[0] ?? null;
 }
 
+// Há registro de como cada parlamentar votou (nominal e com votos computados).
+export const temVotoNominal = (v: VotacaoResumo) =>
+  estadoDe(v) === "nominal" && v.votosSim + v.votosNao + v.votosAbstencao > 0;
+
 export type CasaLegislativa = "CAMARA" | "SENADO";
 
 export const NOME_CASA: Record<CasaLegislativa, string> = { CAMARA: "Câmara", SENADO: "Senado" };
@@ -65,6 +70,8 @@ export function pertenceAba(p: PropAba, aba: Aba): boolean {
   switch (aba) {
     case "todas":
       return true;
+    case "nominais":
+      return p.votacoes.some(temVotoNominal);
     case "viraram-lei":
       return p.virouLei;
     case "aprovadas-camara":

@@ -1,0 +1,498 @@
+{
+  "head" : {
+    "vars" : [ "item", "partidoLabel" ]
+  },
+  "results" : {
+    "bindings" : [ {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q310123"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Democrata Cristão"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q310230"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Republicano Federal"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q311185"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Liberal"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q485946"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Liberal"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q10304982"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Liberal"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q236503"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Movimento Democrático Brasileiro"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q230578"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido da Social Democracia Brasileira"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q244997"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Movimento Democrático Brasileiro"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q319427"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido da Social Democracia Brasileira"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q463533"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Movimento Democrático Brasileiro"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q485946"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Movimento Democrático Brasileiro"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q156844"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Trabalhista Brasileiro"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q236503"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Trabalhista Brasileiro"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q485946"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Trabalhista Brasileiro"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q236503"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Democrático Social"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q236503"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "AGIR"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q485946"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "AGIR"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q236503"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Renovador Trabalhista Brasileiro"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q155824"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Social Democrático (1945)"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q192361"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Social Democrático (1945)"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q269572"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Social Democrático (1945)"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q296679"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Social Democrático (1945)"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q485946"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Cidadania"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q192377"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Aliança Renovadora Nacional"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q236503"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Aliança Renovadora Nacional"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q294241"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Aliança Renovadora Nacional"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q294430"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Aliança Renovadora Nacional"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q299165"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Aliança Renovadora Nacional"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q312361"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Aliança Renovadora Nacional"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q200812"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "político sem partido"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q238688"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "político sem partido"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q316200"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "político sem partido"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q156844"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Republicano Rio-grandense"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q310209"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Social Progressista"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q312874"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Republicano Conservador"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q310230"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Republicano Paulista"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q311225"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Republicano Paulista"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q314698"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Republicano Paulista"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q314696"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Republicano Fluminense"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q382919"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Republicano Paulista"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q311119"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Republicano Mineiro"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q311121"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Republicano Mineiro"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q311185"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Republicano Mineiro"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q314702"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Republicano Mineiro"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q382830"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Republicano Mineiro"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q40722"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Democrático Trabalhista"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q34982"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido Trabalhista Brasileiro"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q37181"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido dos Trabalhadores"
+      }
+    }, {
+      "item" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q40722"
+      },
+      "partidoLabel" : {
+        "xml:lang" : "pt",
+        "type" : "literal",
+        "value" : "Partido dos Trabalhadores"
+      }
+    } ]
+  }
+}

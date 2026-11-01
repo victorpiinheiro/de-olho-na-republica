@@ -222,3 +222,42 @@ model Indicador {
 
   @@unique([chave, referencia])
 }
+
+// História do país: presidentes da República (Wikidata, carga única).
+model Presidente {
+  id         Int                   @id @default(autoincrement())
+  wikidataId String                @unique
+  nome       String
+  // Filiações partidárias do Wikidata. Não têm data por mandato: 1 item = partido; vários = filiações ao longo da vida.
+  partidos   String[]
+  mandatos   MandatoPresidencial[]
+}
+
+model MandatoPresidencial {
+  id           Int        @id @default(autoincrement())
+  presidenteId Int
+  presidente   Presidente @relation(fields: [presidenteId], references: [id], onDelete: Cascade)
+  inicio       DateTime   @db.Date
+  // Nulo = em exercício.
+  fim          DateTime?  @db.Date
+
+  @@unique([presidenteId, inicio])
+}
+
+// Orçamento da União por função e subfunção (Siconfi, RREO-Anexo 02). Valores acumulados até o bimestre.
+model DespesaFuncao {
+  id                Int      @id @default(autoincrement())
+  ano               Int
+  bimestre          Int
+  funcao            String
+  // Vazio = total da função. Não é nulo de propósito (NULL não conta como igual na chave única).
+  subfuncao         String   @default("")
+  dotacaoInicial    Decimal? @db.Decimal(18, 2)
+  dotacaoAtualizada Decimal? @db.Decimal(18, 2)
+  empenhado         Decimal? @db.Decimal(18, 2)
+  liquidado         Decimal? @db.Decimal(18, 2)
+  // Posição da linha na fonte (função seguida das suas subfunções), para exibir na ordem oficial.
+  ordem             Int
+
+  @@unique([ano, bimestre, funcao, subfuncao])
+}

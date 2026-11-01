@@ -8,7 +8,7 @@ import type { CardLei as Card } from "@/lib/queries/leis";
 export function CardLei({ lei }: { lei: Card }) {
   const d = lei.destaque;
   return (
-    <article className="card lei">
+    <article className="card lei card-link">
       <div className="lei-topo">
         <StatusLei rotulo={lei.status.rotulo} tom={lei.status.tom} normaJuridica={lei.normaJuridica} />
         <span className="lei-codigo">{lei.codigo}</span>
@@ -44,7 +44,12 @@ export function CardLei({ lei }: { lei: Card }) {
             </>
           )}
         </p>
-        {d && <Placar compacto estado={d.estado} sim={d.sim} nao={d.nao} abst={d.abst} />}
+        {d && (
+          <div className="lei-placar">
+            <Placar compacto estado={d.estado} sim={d.sim} nao={d.nao} abst={d.abst} />
+            {d.estado === "nominal" && <span className="lei-ver-votos">Ver quem votou →</span>}
+          </div>
+        )}
       </div>
     </article>
   );

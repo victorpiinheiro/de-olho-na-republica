@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconeGrafico, IconeImpostometro, IconeInstituicao, IconePessoas } from "@/components/icones";
+import { IconeGrafico, IconeImpostometro, IconeInstituicao, IconeLivro, IconeOrcamento, IconePessoas } from "@/components/icones";
 
 const itens = [
   { href: "/impostometro", rotulo: "Impostômetro", Icone: IconeImpostometro },
   { href: "/parlamentares", rotulo: "Parlamentares", Icone: IconePessoas },
   { href: "/leis", rotulo: "Leis e votações", Icone: IconeInstituicao },
+  { href: "/orcamento", rotulo: "Orçamento", Icone: IconeOrcamento },
   { href: "/eleicoes", rotulo: "Eleições 2026", Icone: IconeGrafico },
+  { href: "/historia", rotulo: "História do país", Icone: IconeLivro },
 ];
 
 export function Sidebar() {

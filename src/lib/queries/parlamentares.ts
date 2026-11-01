@@ -1,56 +1,80 @@
+import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import type { CasaLegislativa } from "@/lib/leis";
 import { SEM_VOTO } from "@/lib/queries/leis";
 import type { LinhaRanking } from "@/lib/ranking";
 
+interface LinhaSql {
+  id: number;
+  nome: string;
+  partido: string;
+  uf: string;
+  fotoUrl: string | null;
+  ativo: boolean;
+  gasto: unknown;
+  notas: bigint;
+  maiorCategoria: string | null;
+  votou: bigint;
+  nominais: bigint;
+}
+
 // Quem não gastou nada no ano também entra no ranking, com gasto 0.
 // `nominais` é o total de votações nominais do plenário no ano (denominador da presença).
+// Uma consulta só: o banco está longe (cada ida e volta custa ~1 s) e a conexão do pooler é única,
+// então cinco consultas em paralelo viravam cinco esperas em fila.
 export async function listarRanking(ano: number, casa: CasaLegislativa) {
-  const doAno = { data: { gte: new Date(Date.UTC(ano, 0, 1)), lt: new Date(Date.UTC(ano + 1, 0, 1)) } };
-  const [parlamentares, somas, porCategoria, votos, nominais] = await Promise.all([
-    db.parlamentar.findMany({ where: { casa } }),
-    db.despesa.groupBy({
-      by: ["parlamentarId"],
-      where: { ano, parlamentar: { casa } },
-      _sum: { valor: true },
-      _count: { _all: true },
-    }),
-    db.despesa.groupBy({
-      by: ["parlamentarId", "tipo"],
-      where: { ano, parlamentar: { casa } },
-      _sum: { valor: true },
-    }),
-    db.voto.groupBy({
-      by: ["parlamentarId"],
-      where: { voto: { notIn: SEM_VOTO }, votacao: { ...doAno, casa } },
-      _count: { _all: true },
-    }),
-    db.votacao.count({ where: { casa, simbolica: false, secreta: false, ...doAno } }),
-  ]);
-  const porId = new Map(somas.map((s) => [s.parlamentarId, s]));
-  const votouPorId = new Map(votos.map((v) => [v.parlamentarId, v._count._all]));
+  const de = new Date(Date.UTC(ano, 0, 1));
+  const ate = new Date(Date.UTC(ano + 1, 0, 1));
+  const rows = await db.$queryRaw<LinhaSql[]>(Prisma.sql`
+    WITH gasto AS (
+      SELECT d."parlamentarId", SUM(d.valor) AS total, COUNT(*) AS notas
+      FROM "Despesa" d JOIN "Parlamentar" p ON p.id = d."parlamentarId"
+      WHERE d.ano = ${ano} AND p.casa = ${casa}::"Casa"
+      GROUP BY d."parlamentarId"
+    ),
+    categoria AS (
+      SELECT DISTINCT ON ("parlamentarId") "parlamentarId", tipo
+      FROM (
+        SELECT d."parlamentarId", d.tipo, SUM(d.valor) AS v
+        FROM "Despesa" d JOIN "Parlamentar" p ON p.id = d."parlamentarId"
+        WHERE d.ano = ${ano} AND p.casa = ${casa}::"Casa"
+        GROUP BY d."parlamentarId", d.tipo
+      ) x
+      ORDER BY "parlamentarId", v DESC
+    ),
+    votos AS (
+      SELECT vt."parlamentarId", COUNT(*) AS votou
+      FROM "Voto" vt JOIN "Votacao" vc ON vc.id = vt."votacaoId"
+      WHERE vt.voto::text <> ALL(${SEM_VOTO}) AND vc.casa = ${casa}::"Casa" AND vc.data >= ${de} AND vc.data < ${ate}
+      GROUP BY vt."parlamentarId"
+    ),
+    nominais AS (
+      SELECT COUNT(*) AS n FROM "Votacao"
+      WHERE casa = ${casa}::"Casa" AND simbolica = false AND secreta = false AND data >= ${de} AND data < ${ate}
+    )
+    SELECT p.id, p.nome, p.partido, p.uf, p."fotoUrl", p.ativo,
+           COALESCE(g.total, 0) AS gasto, COALESCE(g.notas, 0) AS notas,
+           c.tipo AS "maiorCategoria", COALESCE(v.votou, 0) AS votou, (SELECT n FROM nominais) AS nominais
+    FROM "Parlamentar" p
+    LEFT JOIN gasto g ON g."parlamentarId" = p.id
+    LEFT JOIN categoria c ON c."parlamentarId" = p.id
+    LEFT JOIN votos v ON v."parlamentarId" = p.id
+    WHERE p.casa = ${casa}::"Casa"
+  `);
 
-  const maior = new Map<number, { tipo: string; valor: number }>();
-  for (const c of porCategoria) {
-    const valor = Number(c._sum.valor ?? 0);
-    if (valor > (maior.get(c.parlamentarId)?.valor ?? -Infinity)) {
-      maior.set(c.parlamentarId, { tipo: c.tipo, valor });
-    }
-  }
-
-  const linhas: LinhaRanking[] = parlamentares.map((p) => ({
-    id: p.id,
-    nome: p.nome,
-    partido: p.partido,
-    uf: p.uf,
-    fotoUrl: p.fotoUrl,
-    ativo: p.ativo,
-    gasto: Number(porId.get(p.id)?._sum.valor ?? 0),
-    notas: porId.get(p.id)?._count._all ?? 0,
-    maiorCategoria: maior.get(p.id)?.tipo ?? null,
-    votou: votouPorId.get(p.id) ?? 0,
+  const linhas: LinhaRanking[] = rows.map((r) => ({
+    id: r.id,
+    nome: r.nome,
+    partido: r.partido,
+    uf: r.uf,
+    fotoUrl: r.fotoUrl,
+    ativo: r.ativo,
+    gasto: Number(r.gasto),
+    notas: Number(r.notas),
+    maiorCategoria: r.maiorCategoria,
+    votou: Number(r.votou),
   }));
-  return { linhas, nominais };
+  return { linhas, nominais: rows.length > 0 ? Number(rows[0].nominais) : 0 };
 }
 
 export async function buscarPerfil(id: number, ano: number) {

@@ -63,6 +63,19 @@ describe("pertenceAba", () => {
     votacoes,
   });
 
+  describe("aba nominais", () => {
+    it("só entra quem tem votação nominal com votos computados", () => {
+      expect(pertenceAba(prop(false, null, [v(1)]), "nominais")).toBe(true);
+      expect(pertenceAba(prop(false, null, [v(1, { simbolica: true, votosSim: 0, votosNao: 0, votosAbstencao: 0 })]), "nominais")).toBe(false);
+      expect(pertenceAba(prop(false, null, [v(1, { secreta: true })]), "nominais")).toBe(false);
+      expect(pertenceAba(prop(false, null, [v(1, { votosSim: 0, votosNao: 0, votosAbstencao: 0 })]), "nominais")).toBe(false);
+      expect(pertenceAba(prop(false, null, []), "nominais")).toBe(false);
+    });
+    it("uma votação nominal basta, mesmo que a mais recente seja simbólica", () => {
+      expect(pertenceAba(prop(false, null, [v(1), v(5, { simbolica: true })]), "nominais")).toBe(true);
+    });
+  });
+
   it("todas inclui tudo", () => {
     expect(pertenceAba(prop(false, null), "todas")).toBe(true);
   });

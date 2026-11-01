@@ -53,3 +53,17 @@ export const IconeNota = () => (
     <path d="M14 3v4h4M10 12h5M10 16h5" />
   </Icone>
 );
+
+export const IconeLivro = () => (
+  <Icone>
+    <path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z" />
+    <path d="M5 17a3 3 0 0 1 3-3h11M9 8h6" />
+  </Icone>
+);
+
+export const IconeOrcamento = () => (
+  <Icone>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 3v9h9" />
+  </Icone>
+);

@@ -7,6 +7,7 @@ Site de transparência política com 5 seções na sidebar:
 3. **Leis e votações**: o que foi votado, quem propôs, resumo e como cada parlamentar votou
 4. **Eleições 2026**: resultados do TSE e comparação entre 1º e 2º turno
 5. **História do país**: linha do tempo dos presidentes da República desde 1889, por período
+6. **Orçamento**: despesa da União por função de governo (executado × previsto), com subfunções
 
 ## Regra principal
 NENHUM dado é inserido à mão. Tudo vem de fontes oficiais via jobs agendados.
@@ -78,6 +79,8 @@ O front NUNCA chama APIs do governo diretamente: lê do nosso banco.
   | Parlamentares / perfil | 86400 |
   | Impostômetro | 86400 (o contador anda no navegador) |
   | Eleições | `false` (estático) |
+  | Orçamento | 86400 |
+  | História do país | `false` (carga única) |
 
 - Rota `POST /api/revalidate`, protegida por `Authorization: Bearer ${REVALIDATE_SECRET}`,
   recebe `{ paths: string[] }` e chama `revalidatePath` em cada um. Os jobs chamam essa rota ao terminar.
@@ -98,6 +101,8 @@ O front NUNCA chama APIs do governo diretamente: lê do nosso banco.
 | Lista de parlamentares | 1x/semana |
 | Tamanho do banco | 1x/semana |
 | Arrecadação | mensal (dia 5) |
+| Arrecadação estadual (Siconfi) | mensal |
+| Orçamento da União (Siconfi) | mensal (o RREO sai a cada bimestre) |
 | Eleições 2026 | carga única, rodada manualmente (workflow_dispatch) |
 
 ---
@@ -111,6 +116,7 @@ O front NUNCA chama APIs do governo diretamente: lê do nosso banco.
 | Eleições 2026 | https://resultados.tse.jus.br/oficial/comum/config/ele-c.json | JSON; 1º e 2º turno têm códigos de eleição diferentes |
 | Histórico eleitoral | Portal de Dados Abertos do TSE | CSV/ZIP, carga única (opcional) |
 | Arrecadação | Receita Federal / Tesouro Nacional | CSV/planilha mensal |
+| Orçamento da União (função/subfunção) | Siconfi, `rreo` com `no_anexo=RREO-Anexo 02` e `id_ente=1` | REST JSON, bimestral, acumulado no ano |
 | Presidentes (mandatos, partido) | Wikidata (SPARQL, `P39` = Q5176750) | JSON, carga única; confirmar a Galeria de Presidentes da Biblioteca da Presidência |
 
 Endpoints principais da Câmara:
@@ -194,10 +200,16 @@ Regras:
    dos dois turnos, quem ficou fora do 2º turno, tabela por UF destacando "virada"
 7. **História do país**: linha do tempo 1889–2026 colorida por período (República Velha, Era Vargas,
    República de 1946, Regime militar, Nova República), lista de presidentes agrupada por período,
-   cartão do presidente (mandato, duração, partido, fontes). Realizações e críticas por IA: a decidir
-   (ver Etapa 8)
+   cartão do presidente (períodos no cargo, duração, partido ou filiações, fontes).
+   Sem texto de IA, sem chegada/saída/vice (decisão da Etapa 8)
 
 ---
+
+7b. **Orçamento da União** (pronto): `npm run sync:orcamento`, tabela `DespesaFuncao`, tela `/orcamento`.
+   Só a União (estados/municípios ficam de fora). Valores = despesa liquidada acumulada até o último bimestre
+   publicado; "Encargos Especiais" (dívida e transferências) é ~40% do total e vem com aviso. O adapter confere
+   que subfunções somam a função e funções somam o total, e falha se a estrutura da fonte mudar. A lista de
+   funções em `siconfi/orcamento.ts` é a classificação funcional oficial (Portaria MOG 42/1999).
 
 ## Roteiro de etapas
 1. **Fundação**: Next.js + Prisma + Supabase, schema completo (Parlamentar, Despesa, Proposicao, Autor,
@@ -208,10 +220,12 @@ Regras:
 5. **Senado**: API de votações + CSV do CEAPS
 6. **Eleições 2026**: ingestão do JSON do TSE + tela de comparação
 7. **Impostômetro**: job de arrecadação, cálculo da projeção, contador
-8. **História do país**: carga única do Wikidata (mandatos, partido) + tela de linha do tempo.
-   Pendente de decisão antes de codar: texto de contexto/realizações/críticas (IA × só dados
-   estruturados), origem de "chegada ao poder", "saída" e vice (o Wikidata não traz de forma confiável)
-   e a tabela de períodos históricos
+8. **História do país** (pronta): carga única do Wikidata (`npm run sync:presidentes`) + tela `/historia`.
+   Decisões: só dados estruturados (sem IA); sem chegada/saída/vice (Wikidata não traz de forma confiável);
+   períodos = tabela fixa em `src/lib/historia.ts`, por data de início do mandato; 36 pessoas (juntas de
+   1930 e 1969 não são pessoas no Wikidata e ficam fora, com aviso na tela); mandatos seguidos da mesma
+   pessoa são juntados; o Wikidata não data a filiação por mandato, então 1 partido = "Partido" e vários =
+   "Filiações ao longo da vida"
 9. **Operação**: workflows do GitHub Actions, `/api/revalidate`, alertas de falha, job de tamanho do banco, deploy na Vercel
 
 ## Como trabalhar comigo
