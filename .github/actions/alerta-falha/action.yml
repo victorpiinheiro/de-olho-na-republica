@@ -1,0 +1,30 @@
+name: Alerta de falha
+description: Abre uma issue (ou comenta na já aberta) quando um workflow agendado falha. O GitHub avisa por e-mail.
+inputs:
+  workflow:
+    description: Nome do workflow que falhou
+    required: true
+  token:
+    description: GITHUB_TOKEN com permissão issues:write
+    required: true
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        WORKFLOW: ${{ inputs.workflow }}
+        URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: |
+        titulo="Falha no workflow: ${WORKFLOW}"
+        corpo="O workflow **${WORKFLOW}** falhou em $(date -u '+%Y-%m-%d %H:%M UTC').
+
+        Execução e logs: ${URL}
+
+        Se os jobs ficarem parados por mais de 1 semana, o banco do Supabase pausa."
+        existente=$(gh issue list --state open --search "\"${titulo}\" in:title" --json number --jq '.[0].number // empty')
+        if [ -n "$existente" ]; then
+          gh issue comment "$existente" --body "$corpo"
+        else
+          gh issue create --title "$titulo" --body "$corpo"
+        fi

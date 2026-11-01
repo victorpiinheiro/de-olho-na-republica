@@ -1,0 +1,11 @@
+name: Preparar
+description: Checkout já feito; instala Node e as dependências (o postinstall roda prisma generate).
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24
+        cache: npm
+    - run: npm ci
+      shell: bash

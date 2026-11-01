@@ -1,0 +1,41 @@
+name: Votações (Câmara e Senado)
+
+# De hora em hora, das 8h às 20h de Brasília (11h–23h UTC), de segunda a sexta.
+on:
+  schedule:
+    - cron: "0 11-23 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: votacoes
+  cancel-in-progress: false
+
+jobs:
+  votacoes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SITE_URL: ${{ secrets.SITE_URL }}
+      REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/preparar
+      - name: Votações da Câmara (últimos 2 dias)
+        run: npx tsx --tsconfig tsconfig.json src/jobs/sync-votacoes.ts --desde=$(date -u -d '2 days ago' +%F)
+      - name: Votações do Senado (últimos 2 dias)
+        if: ${{ !cancelled() }}
+        run: npx tsx --tsconfig tsconfig.json src/jobs/sync-votacoes-senado.ts --desde=$(date -u -d '2 days ago' +%F)
+      - name: Atualizar páginas
+        if: ${{ success() }}
+        run: npx tsx --tsconfig tsconfig.json src/jobs/revalidar.ts '/leis' '/leis/[aba]' '/leis/proposicao/[id]' '/parlamentares' '/parlamentares/senado' '/parlamentares/[id]'
+      - name: Alerta de falha
+        if: ${{ failure() }}
+        uses: ./.github/actions/alerta-falha
+        with:
+          workflow: Votações
+          token: ${{ github.token }}

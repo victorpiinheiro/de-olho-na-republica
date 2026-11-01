@@ -1,0 +1,45 @@
+name: Carga única (eleições e presidentes)
+
+# Só manual: Actions → Carga única → Run workflow.
+on:
+  workflow_dispatch:
+    inputs:
+      job:
+        description: Qual carga rodar
+        type: choice
+        required: true
+        options:
+          - sync-eleicoes
+          - sync-presidentes
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  carga:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SITE_URL: ${{ secrets.SITE_URL }}
+      REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/preparar
+      - name: Rodar ${{ inputs.job }}
+        run: npx tsx --tsconfig tsconfig.json src/jobs/${{ inputs.job }}.ts
+      - name: Atualizar páginas
+        if: ${{ success() }}
+        run: |
+          if [ "${{ inputs.job }}" = "sync-eleicoes" ]; then
+            npx tsx --tsconfig tsconfig.json src/jobs/revalidar.ts '/eleicoes'
+          else
+            npx tsx --tsconfig tsconfig.json src/jobs/revalidar.ts '/historia'
+          fi
+      - name: Alerta de falha
+        if: ${{ failure() }}
+        uses: ./.github/actions/alerta-falha
+        with:
+          workflow: Carga única (${{ inputs.job }})
+          token: ${{ github.token }}

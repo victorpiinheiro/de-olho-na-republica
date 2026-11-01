@@ -4,7 +4,7 @@ Site de transparência política. Reúne, em um só lugar, o que o Congresso gas
 
 **Regra principal: nenhum dado é digitado à mão.** Tudo vem de fontes oficiais, coletado por jobs agendados e gravado no nosso banco. O site nunca chama APIs do governo direto: ele só lê do banco. Quando um número é estimativa, a tela diz isso.
 
-> **Estado do projeto:** as telas e os jobs de coleta estão prontos (Etapas 1 a 8). O agendamento automático (GitHub Actions), a rota de revalidação, os alertas de falha e o deploy ainda não foram feitos (Etapa 9). Veja [O que falta](#o-que-falta).
+> **Estado do projeto:** telas, jobs de coleta, workflows agendados, rota de revalidação e alertas de falha estão prontos. Falta cadastrar os segredos no GitHub e fazer o deploy na Vercel. Veja [`docs/OPERACAO.md`](docs/OPERACAO.md) e [O que falta](#o-que-falta).
 
 ---
 
@@ -86,10 +86,12 @@ Cada um roda com `npm run sync:<nome>`.
 | `sync:senadores` | Lista de senadores | semanal |
 | `sync:despesas` | Despesas da cota (Câmara, CSV anual) | diária |
 | `sync:ceaps` | Despesas dos senadores (CEAPS) | diária |
-| `sync:votacoes` | Votações e votos da Câmara | de hora em hora, dias úteis |
-| `sync:proposicoes` | Situação e data de lei das proposições da Câmara | de hora em hora, dias úteis |
-| `sync:votacoes-senado` | Votações e votos do Senado | de hora em hora, dias úteis |
-| `sync:proposicoes-senado` | Situação e norma das proposições do Senado | de hora em hora, dias úteis |
+| `sync:votacoes` | Votações e votos da Câmara | de hora em hora, 8h–20h, dias úteis |
+| `sync:proposicoes` | Situação e data de lei das proposições da Câmara | diária |
+| `sync:votacoes-senado` | Votações e votos do Senado | de hora em hora, 8h–20h, dias úteis |
+| `job:tamanho-banco` | Registra o tamanho do banco; falha acima de 400 MB | semanal |
+| `job:revalidar` | Chama `/api/revalidate` ao fim dos outros jobs | após cada workflow |
+| `sync:proposicoes-senado` | Situação e norma das proposições do Senado | diária |
 | `sync:arrecadacao` | Arrecadação federal (Receita) | mensal (dia 5) |
 | `sync:arrecadacao-estados` | Arrecadação estadual, 27 UFs (Siconfi); leva cerca de 8 min | mensal |
 | `sync:orcamento` | Orçamento da União (Siconfi) | mensal (o RREO sai a cada bimestre) |
@@ -118,7 +120,7 @@ Outros comandos: `npm test` (testes), `npm run typecheck`, `npm run lint`, `npm 
 |---|---|
 | `DATABASE_URL` | Conexão do app e dos jobs (pooler, porta 6543) |
 | `DIRECT_URL` | Só migrations (conexão direta, porta 5432) |
-| `REVALIDATE_SECRET` | Protege a rota `POST /api/revalidate` (Etapa 9) |
+| `REVALIDATE_SECRET` | Protege a rota `POST /api/revalidate` |
 | `CAMARA_DESPESAS_CSV_URL` | CSV anual de despesas da Câmara; `{ano}` é substituído |
 | `SENADO_CEAPS_URL` | API de despesas dos senadores (CEAPS); `{ano}` é substituído |
 | `RECEITA_ANALISE_URL` | Relatório de arrecadação da Receita Federal |
@@ -131,12 +133,10 @@ O Supabase grátis tem 500 MB, 5 GB de egress por mês e pausa após 1 semana se
 
 ## O que falta
 
-Etapa 9 (Operação):
-- Workflows do GitHub Actions agendados por frequência
-- Rota `POST /api/revalidate` chamada pelos jobs ao terminar
-- Alertas de falha de job (obrigatório: se os jobs param, o Supabase pausa)
-- Job semanal do tamanho do banco, com alerta acima de 400 MB
-- Deploy na Vercel
+Operação (veja [`docs/OPERACAO.md`](docs/OPERACAO.md)):
+- Cadastrar os Secrets e Variables no GitHub
+- Deploy na Vercel e cadastro de `SITE_URL`
+- Rodar a primeira carga em ordem
 
 Melhorias conhecidas: inserts em lote no job estadual; conferir se há sobreposição entre Federal e Estadual no total do Impostômetro; confirmar se "Serviço da Dívida Interna" inclui rolagem da dívida.
 

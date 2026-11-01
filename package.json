@@ -22,7 +22,9 @@
     "sync:arrecadacao": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-arrecadacao.ts",
     "sync:arrecadacao-estados": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-arrecadacao-estados.ts",
     "sync:presidentes": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-presidentes.ts",
-    "sync:orcamento": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-orcamento.ts"
+    "sync:orcamento": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-orcamento.ts",
+    "job:tamanho-banco": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/tamanho-banco.ts",
+    "job:revalidar": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/revalidar.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

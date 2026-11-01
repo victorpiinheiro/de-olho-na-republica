@@ -1,0 +1,46 @@
+name: Mensal (arrecadação e orçamento)
+
+# Dia 5 de cada mês às 6h de Brasília (9h UTC). O Siconfi sai por bimestre: nos outros meses
+# os jobs só confirmam que não há dado novo.
+on:
+  schedule:
+    - cron: "0 9 5 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: mensal
+  cancel-in-progress: false
+
+jobs:
+  mensal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SITE_URL: ${{ secrets.SITE_URL }}
+      REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
+      RECEITA_ANALISE_URL: ${{ vars.RECEITA_ANALISE_URL || secrets.RECEITA_ANALISE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/preparar
+      - name: Arrecadação federal (Receita)
+        run: npx tsx --tsconfig tsconfig.json src/jobs/sync-arrecadacao.ts
+      - name: Arrecadação estadual (Siconfi, 27 UFs)
+        if: ${{ !cancelled() }}
+        run: npx tsx --tsconfig tsconfig.json src/jobs/sync-arrecadacao-estados.ts
+      - name: Orçamento da União (Siconfi)
+        if: ${{ !cancelled() }}
+        run: npx tsx --tsconfig tsconfig.json src/jobs/sync-orcamento.ts
+      - name: Atualizar páginas
+        if: ${{ success() }}
+        run: npx tsx --tsconfig tsconfig.json src/jobs/revalidar.ts '/impostometro' '/orcamento'
+      - name: Alerta de falha
+        if: ${{ failure() }}
+        uses: ./.github/actions/alerta-falha
+        with:
+          workflow: Mensal
+          token: ${{ github.token }}

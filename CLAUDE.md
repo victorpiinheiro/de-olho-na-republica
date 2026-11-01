@@ -96,8 +96,9 @@ O front NUNCA chama APIs do governo diretamente: lê do nosso banco.
 ### Agendamento
 | Job | Frequência |
 |---|---|
-| Votações e proposições | de hora em hora, dias úteis |
-| Despesas (Câmara e Senado) | 1x/dia |
+| Votações (Câmara e Senado, janela de 2 dias) | de hora em hora, 8h–20h de Brasília, dias úteis |
+| Proposições (situação e data da lei) | 1x/dia (reconsulta todas as pendentes, ~6 min) |
+| Despesas (Câmara e Senado) | 1x/dia (3h de Brasília) |
 | Lista de parlamentares | 1x/semana |
 | Tamanho do banco | 1x/semana |
 | Arrecadação | mensal (dia 5) |
@@ -226,7 +227,7 @@ Regras:
    1930 e 1969 não são pessoas no Wikidata e ficam fora, com aviso na tela); mandatos seguidos da mesma
    pessoa são juntados; o Wikidata não data a filiação por mandato, então 1 partido = "Partido" e vários =
    "Filiações ao longo da vida"
-9. **Operação**: workflows do GitHub Actions, `/api/revalidate`, alertas de falha, job de tamanho do banco, deploy na Vercel
+9. **Operação** (código pronto; falta cadastrar segredos e fazer o deploy): workflows em `.github/workflows` (votacoes, diario, semanal, mensal, carga-unica), `POST /api/revalidate` com lista fixa de caminhos, alerta de falha por issue do GitHub, job `tamanho-banco` (falha acima de 400 MB). Passo a passo em `docs/OPERACAO.md`
 
 ## Como trabalhar comigo
 - Antes de codar uma etapa, mostre o plano (arquivos, modelos, decisões) e espere meu ok.
