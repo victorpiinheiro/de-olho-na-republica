@@ -1,0 +1,221 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Casa {
+  CAMARA
+  SENADO
+}
+
+enum TipoVoto {
+  SIM
+  NAO
+  ABSTENCAO
+  OBSTRUCAO
+  AUSENTE
+  // O presidente da sessão só vota para desempatar (art. 17 na Câmara, art. 51 no Senado).
+  PRESIDENTE
+  // Senado: senador presente que não registrou voto (diferente de ausente).
+  PRESENTE_SEM_VOTO
+}
+
+enum Esfera {
+  FEDERAL
+  ESTADUAL
+  MUNICIPAL
+}
+
+model Parlamentar {
+  id           Int      @id @default(autoincrement())
+  casa         Casa
+  idOrigem     String
+  nome         String
+  nomeCivil    String?
+  partido      String
+  uf           String   @db.Char(2)
+  fotoUrl      String?
+  email        String?
+  ativo        Boolean  @default(true)
+  legislatura  Int
+  atualizadoEm DateTime @updatedAt
+
+  despesas Despesa[]
+  votos    Voto[]
+  autorias Autor[]
+
+  @@unique([casa, idOrigem])
+  @@index([casa, uf])
+  @@index([casa, partido])
+}
+
+model Despesa {
+  id            Int       @id @default(autoincrement())
+  parlamentarId Int
+  ano           Int
+  mes           Int
+  tipo          String
+  fornecedor    String
+  cnpjCpf       String?
+  valor         Decimal   @db.Decimal(12, 2)
+  dataDocumento DateTime? @db.Date
+  urlDocumento  String?
+  hash          String    @unique
+
+  parlamentar Parlamentar @relation(fields: [parlamentarId], references: [id], onDelete: Cascade)
+
+  @@index([parlamentarId, ano, mes])
+  @@index([ano, mes])
+}
+
+model Proposicao {
+  id               Int       @id @default(autoincrement())
+  casa             Casa
+  idOrigem         String
+  siglaTipo        String
+  numero           Int
+  ano              Int
+  ementa           String
+  resumoIa         String?
+  urlInteiroTeor   String?
+  situacao         String?
+  virouLei         Boolean   @default(false)
+  normaJuridica    String?
+  dataApresentacao DateTime? @db.Date
+  atualizadoEm     DateTime  @updatedAt
+
+  autores  Autor[]
+  votacoes Votacao[]
+
+  @@unique([casa, idOrigem])
+  @@index([virouLei])
+}
+
+model Autor {
+  id            Int     @id @default(autoincrement())
+  proposicaoId  Int
+  parlamentarId Int?
+  nome          String
+  tipo          String?
+  ordem         Int     @default(0)
+
+  proposicao  Proposicao   @relation(fields: [proposicaoId], references: [id], onDelete: Cascade)
+  parlamentar Parlamentar? @relation(fields: [parlamentarId], references: [id], onDelete: SetNull)
+
+  @@unique([proposicaoId, nome])
+}
+
+model Votacao {
+  id             Int      @id @default(autoincrement())
+  casa           Casa
+  idOrigem       String
+  proposicaoId   Int?
+  data           DateTime
+  descricao      String
+  aprovada       Boolean?
+  // Votação simbólica não tem votos nominais: estado próprio, não lista vazia.
+  simbolica      Boolean  @default(false)
+  // Votação secreta: sabemos quem participou, mas não como cada um votou.
+  secreta        Boolean  @default(false)
+  votosSim       Int      @default(0)
+  votosNao       Int      @default(0)
+  votosAbstencao Int      @default(0)
+
+  proposicao  Proposicao?         @relation(fields: [proposicaoId], references: [id], onDelete: SetNull)
+  votos       Voto[]
+  orientacoes OrientacaoPartido[]
+
+  @@unique([casa, idOrigem])
+  @@index([data])
+  @@index([proposicaoId])
+}
+
+model Voto {
+  id            Int      @id @default(autoincrement())
+  votacaoId     Int
+  parlamentarId Int
+  partido       String
+  voto          TipoVoto
+
+  votacao     Votacao     @relation(fields: [votacaoId], references: [id], onDelete: Cascade)
+  parlamentar Parlamentar @relation(fields: [parlamentarId], references: [id], onDelete: Cascade)
+
+  @@unique([votacaoId, parlamentarId])
+  @@index([parlamentarId])
+}
+
+model OrientacaoPartido {
+  id         Int    @id @default(autoincrement())
+  votacaoId  Int
+  partido    String
+  orientacao String
+
+  votacao Votacao @relation(fields: [votacaoId], references: [id], onDelete: Cascade)
+
+  @@unique([votacaoId, partido])
+}
+
+// Só agregados: uma linha por eleição/turno/cargo/escopo (uf = "BR" ou sigla da UF).
+model Eleicao {
+  id             Int     @id @default(autoincrement())
+  ano            Int
+  turno          Int
+  cargo          String
+  uf             String  @db.VarChar(2)
+  codigoTse      String?
+  aptos          Int
+  comparecimento Int
+  abstencoes     Int
+  votosBrancos   Int
+  votosNulos     Int
+  votosValidos   Int
+
+  resultados ResultadoCandidato[]
+
+  @@unique([ano, turno, cargo, uf])
+}
+
+model ResultadoCandidato {
+  id         Int     @id @default(autoincrement())
+  eleicaoId  Int
+  numero     Int
+  nome       String
+  partido    String
+  votos      Int
+  percentual Decimal @db.Decimal(6, 3)
+  eleito     Boolean @default(false)
+
+  eleicao Eleicao @relation(fields: [eleicaoId], references: [id], onDelete: Cascade)
+
+  @@unique([eleicaoId, numero])
+}
+
+model Arrecadacao {
+  id        Int      @id @default(autoincrement())
+  esfera    Esfera
+  tributo   String
+  ano       Int
+  mes       Int
+  valor     Decimal  @db.Decimal(18, 2)
+  // true quando o mês ainda não foi divulgado e o valor é projeção.
+  estimado  Boolean  @default(false)
+  // Valor a preços do último mês divulgado (IPCA, série da própria Receita). Nulo em estimativas.
+  valorReal Decimal? @db.Decimal(18, 2)
+
+  @@unique([esfera, tributo, ano, mes])
+}
+
+// Números únicos que a tela precisa e que não são séries mensais (ex.: população do Brasil).
+model Indicador {
+  id         Int     @id @default(autoincrement())
+  chave      String
+  referencia String
+  valor      Decimal @db.Decimal(18, 2)
+
+  @@unique([chave, referencia])
+}

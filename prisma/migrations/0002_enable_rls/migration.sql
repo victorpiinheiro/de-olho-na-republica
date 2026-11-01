@@ -1,0 +1,13 @@
+-- RLS ligada em todas as tabelas, sem nenhuma policy: a API REST pública do Supabase
+-- (chave anon) não enxerga nada. O Prisma conecta como `postgres` e não é afetado.
+ALTER TABLE "Parlamentar" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Despesa" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Proposicao" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Autor" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Votacao" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Voto" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "OrientacaoPartido" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Eleicao" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "ResultadoCandidato" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Arrecadacao" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "_prisma_migrations" ENABLE ROW LEVEL SECURITY;

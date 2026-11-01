@@ -4,21 +4,42 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma migrate deploy && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "prisma generate",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "sync:deputados": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-deputados.ts",
+    "sync:despesas": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-despesas.ts",
+    "sync:votacoes": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-votacoes.ts",
+    "sync:proposicoes": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-proposicoes.ts",
+    "sync:senadores": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-senadores.ts",
+    "sync:ceaps": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-ceaps.ts",
+    "sync:votacoes-senado": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-votacoes-senado.ts",
+    "sync:proposicoes-senado": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-proposicoes-senado.ts",
+    "sync:eleicoes": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-eleicoes.ts",
+    "sync:arrecadacao": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-arrecadacao.ts"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "@tanstack/react-query": "^5.105.0",
+    "csv-parse": "^7.0.3",
+    "fflate": "^0.8.3",
     "next": "16.4.3",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^24.19.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
-    "typescript": "^5"
+    "prisma": "^6.19.3",
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.0.5"
   }
 }
