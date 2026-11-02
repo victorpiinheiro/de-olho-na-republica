@@ -16,7 +16,7 @@ Site de transparência política. Reúne, em um só lugar, o que o Congresso gas
 | **Parlamentares** | Deputados e senadores, ranking de gasto da cota parlamentar, presença, perfil com notas fiscais | Câmara: Dados Abertos da Câmara (API REST e CSV anual de despesas). Senado: Dados Abertos do Senado (API) e verbas indenizatórias (CEAPS) |
 | **Leis e votações** | Proposições que viraram lei, foram aprovadas ou rejeitadas, resumo, autoria, placar, tramitação e como cada parlamentar votou | Câmara e Senado (Dados Abertos), mesmas APIs acima |
 | **Eleições 2026** | Resultados do 1º e do 2º turno, comparação entre os dois, comparecimento, finalistas e virada por UF | TSE, resultados oficiais (`resultados.tse.jus.br`) |
-| **História do país** | Linha do tempo dos presidentes desde 1889, agrupados por período, com mandatos e partido | Wikidata (consulta SPARQL: cargo de Presidente do Brasil) |
+| **História do país** | Linha do tempo dos presidentes desde 1889, agrupados por período, com foto, mandatos e partido | Wikidata (consulta SPARQL: cargo de Presidente do Brasil e foto) e Wikimedia Commons (autor e licença da foto) |
 | **Orçamento** | Despesa da União por função de governo (Saúde, Educação, Previdência...) e subfunção, executado × previsto | Tesouro Nacional, API Siconfi (RREO Anexo 02, ente União) |
 
 ### Como ler cada tela
@@ -48,6 +48,9 @@ Site de transparência política. Reúne, em um só lugar, o que o Congresso gas
 **História do país**
 - Só dados estruturados do Wikidata, sem texto de IA. Os períodos (República Velha, Era Vargas, República de 1946, Regime militar, Nova República) são uma tabela fixa no código (`src/lib/historia.ts`), por data de início do mandato.
 - As juntas militares de 1930 e 1969 não são pessoas no Wikidata e ficam de fora, com aviso na tela.
+- As fotos vêm do Wikidata (P18) e do Wikimedia Commons: 36 de 36, sendo 28 em domínio público e 8 com licença Creative
+  Commons. Guardamos só o endereço da miniatura, com autor e licença, e o crédito aparece sempre abaixo da foto. A
+  classificação da licença é a do Commons. Foto sem licença conhecida não é exibida (aparecem as iniciais).
 - O Wikidata não data a filiação partidária por mandato. Quem tem um único partido aparece como "Partido"; quem tem vários, como "Filiações ao longo da vida".
 
 **Orçamento**

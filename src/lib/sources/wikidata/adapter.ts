@@ -1,4 +1,5 @@
-import type { MandatoRow, PartidoRow } from "./schemas";
+import { arquivoDaFoto, fotosPorArquivo, type CommonsResposta, type FotoNossa } from "./commons";
+import type { FotoRow, MandatoRow, PartidoRow } from "./schemas";
 
 export interface MandatoNosso {
   inicio: string; // YYYY-MM-DD
@@ -64,4 +65,33 @@ export function toPresidentes(mandatos: MandatoRow[], partidos: PartidoRow[]): P
   const emExercicio = out.flatMap((p) => p.mandatos).filter((m) => m.fim === null);
   if (emExercicio.length > 1) throw new Error(`${emExercicio.length} mandatos em exercício ao mesmo tempo`);
   return out.sort((a, b) => a.mandatos[0].inicio.localeCompare(b.mandatos[0].inicio));
+}
+
+export interface PresidenteComFoto extends PresidenteNosso {
+  foto: FotoNossa | null;
+}
+
+const MINIMO_FOTOS = 25; // hoje são 36 de 36: bem menos que isso indica consulta ou API quebrada
+
+// Liga a foto (Wikidata P18) e seu crédito (Commons) a cada presidente. Quem não tem foto, ou tem foto sem licença
+// conhecida, fica com `foto: null` e aparece em `semFoto` para o job avisar.
+export function comFotos(
+  presidentes: PresidenteNosso[],
+  fotos: FotoRow[],
+  commons: CommonsResposta[],
+): { presidentes: PresidenteComFoto[]; semFoto: string[] } {
+  const arquivoPorId = new Map<string, string>();
+  for (const f of [...fotos].sort((a, b) => a.foto.value.localeCompare(b.foto.value))) {
+    const id = qid(f.item.value);
+    if (!arquivoPorId.has(id)) arquivoPorId.set(id, arquivoDaFoto(f.foto.value));
+  }
+  const porArquivo = fotosPorArquivo(commons, [...new Set(arquivoPorId.values())]);
+
+  const out = presidentes.map((p) => {
+    const arquivo = arquivoPorId.get(p.wikidataId);
+    return { ...p, foto: arquivo ? (porArquivo.get(arquivo) ?? null) : null };
+  });
+  const comFoto = out.filter((p) => p.foto).length;
+  if (comFoto < MINIMO_FOTOS) throw new Error(`só ${comFoto} presidentes com foto e licença: consulta incompleta`);
+  return { presidentes: out, semFoto: out.filter((p) => !p.foto).map((p) => p.nome) };
 }

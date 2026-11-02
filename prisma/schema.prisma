@@ -231,6 +231,13 @@ model Presidente {
   nome       String
   // Filiações partidárias do Wikidata. Não têm data por mandato: 1 item = partido; vários = filiações ao longo da vida.
   partidos   String[]
+  // Foto do Wikidata (P18) com autor e licença do Wikimedia Commons. Só o endereço da miniatura: a imagem não é guardada.
+  // Sem licença conhecida, a foto não entra (todos os campos nulos).
+  fotoUrl        String?
+  fotoAutor      String?
+  fotoLicenca    String?
+  fotoLicencaUrl String?
+  fotoPagina     String?
   mandatos   MandatoPresidencial[]
 }
 

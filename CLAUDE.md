@@ -122,7 +122,8 @@ O front NUNCA chama APIs do governo diretamente: lê do nosso banco.
 | Arrecadação estadual, líquida | Siconfi, `rreo` Anexo 01, 27 estados | REST JSON, bimestral, **líquida** de repasses a municípios e FUNDEB |
 | Receita estadual, bruta por imposto | Siconfi, `dca` com `no_anexo=DCA-Anexo I-C` (ICMS, IPVA, ITCMD, IR retido, taxas, com 3 colunas de dedução) | REST JSON, **anual** (a do ano N sai por volta de abril de N+1) |
 | Orçamento da União (função/subfunção) | Siconfi, `rreo` com `no_anexo=RREO-Anexo 02` e `id_ente=1` | REST JSON, bimestral, acumulado no ano |
-| Presidentes (mandatos, partido) | Wikidata (SPARQL, `P39` = Q5176750) | JSON, carga única; confirmar a Galeria de Presidentes da Biblioteca da Presidência |
+| Presidentes (mandatos, partido, foto) | Wikidata (SPARQL, `P39` = Q5176750; foto = `P18`) | JSON, carga única; confirmar a Galeria de Presidentes da Biblioteca da Presidência |
+| Foto do presidente: autor e licença | Wikimedia Commons, API `action=query&prop=imageinfo` (`extmetadata`) | JSON; só o endereço da miniatura é guardado, nunca a imagem |
 
 Endpoints principais da Câmara:
 ```
@@ -216,7 +217,7 @@ Regras:
    dos dois turnos, quem ficou fora do 2º turno, tabela por UF destacando "virada"
 7. **História do país**: linha do tempo 1889–2026 colorida por período (República Velha, Era Vargas,
    República de 1946, Regime militar, Nova República), lista de presidentes agrupada por período,
-   cartão do presidente (períodos no cargo, duração, partido ou filiações, fontes).
+   cartão do presidente (foto com crédito, períodos no cargo, duração, partido ou filiações, fontes).
    Sem texto de IA, sem chegada/saída/vice (decisão da Etapa 8)
 
 ---
@@ -241,7 +242,10 @@ Regras:
    períodos = tabela fixa em `src/lib/historia.ts`, por data de início do mandato; 36 pessoas (juntas de
    1930 e 1969 não são pessoas no Wikidata e ficam fora, com aviso na tela); mandatos seguidos da mesma
    pessoa são juntados; o Wikidata não data a filiação por mandato, então 1 partido = "Partido" e vários =
-   "Filiações ao longo da vida"
+   "Filiações ao longo da vida". Fotos: Wikidata P18 + autor e licença do Commons (36 de 36: 28 domínio público,
+   8 Creative Commons); a foto só entra com licença conhecida e sem restrição declarada; o crédito (autor ou
+   "autor desconhecido", licença e link do Commons) fica sempre visível no cartão; a classificação de licença é a do
+   Commons, não conferência nossa; imagens via `next/image` (só `thumb.wikimedia.org` e `upload.wikimedia.org`)
 9. **Operação** (código pronto; falta cadastrar segredos e fazer o deploy): workflows em `.github/workflows` (votacoes, diario, semanal, mensal, carga-unica), `POST /api/revalidate` com lista fixa de caminhos, alerta de falha por issue do GitHub, job `tamanho-banco` (falha acima de 400 MB). Passo a passo em `docs/OPERACAO.md`
 
 ## Como trabalhar comigo

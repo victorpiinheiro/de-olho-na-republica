@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { FotoPresidente } from "@/components/FotoPresidente";
 import { Kpi } from "@/components/Kpi";
 import { duracaoTexto, PERIODOS, partidoTexto } from "@/lib/historia";
 import type { PresidenteDto } from "@/lib/queries/historia";
@@ -86,7 +87,7 @@ export function PainelHistoria({ presidentes, hoje }: { presidentes: PresidenteD
       <div className="historia-corpo">
         <section className="card historia-cartao" aria-labelledby="titulo-presidente" aria-live="polite">
           <div className="cartao-topo">
-            <span className="avatar" aria-hidden="true">{p.iniciais}</span>
+            <FotoPresidente url={p.foto?.url ?? null} iniciais={p.iniciais} alt={`Foto de ${p.nome}`} tamanho="grande" />
             <div className="cartao-nome">
               <h2 id="titulo-presidente">{p.nome}</h2>
               <p>{p.mandatos.map(intervalo).join(" · ")} · {periodosDele.join(" / ")}</p>
@@ -96,6 +97,18 @@ export function PainelHistoria({ presidentes, hoje }: { presidentes: PresidenteD
               <button type="button" className="botao-icone" aria-label="Próximo presidente" disabled={indice === presidentes.length - 1} onClick={() => setSelId(presidentes[indice + 1].id)}>›</button>
             </div>
           </div>
+
+          {p.foto && (
+            <p className="foto-credito">
+              Foto: {p.foto.autor ?? "autor desconhecido"} ·{" "}
+              {p.foto.licencaUrl ? (
+                <a href={p.foto.licencaUrl} target="_blank" rel="noopener noreferrer">{p.foto.licenca}</a>
+              ) : (
+                p.foto.licenca
+              )}{" "}
+              · <a href={p.foto.pagina} target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>
+            </p>
+          )}
 
           <div className="kpis kpis-3">
             <Kpi
@@ -116,8 +129,10 @@ export function PainelHistoria({ presidentes, hoje }: { presidentes: PresidenteD
           <div className="historia-fontes">
             <h3>Fontes</h3>
             <p>
-              Nome, datas de início e fim de cada período no cargo e filiações: Wikidata (carga única). O Wikidata não
-              informa o partido de cada mandato, por isso, quando há mais de uma filiação, a tela lista todas.
+              Nome, datas de início e fim de cada período no cargo, filiações e foto: Wikidata (carga única). O Wikidata não
+              informa o partido de cada mandato, por isso, quando há mais de uma filiação, a tela lista todas. As fotos são do
+              Wikimedia Commons, com o autor e a licença de cada uma indicados abaixo da foto; a classificação de licença é a
+              do Commons.
             </p>
           </div>
         </section>
@@ -144,7 +159,8 @@ export function PainelHistoria({ presidentes, hoje }: { presidentes: PresidenteD
                           aria-pressed={pr.id === selId}
                           onClick={() => setSelId(pr.id)}
                         >
-                          <span>{pr.nome}</span>
+                          <FotoPresidente url={pr.foto?.url ?? null} iniciais={pr.iniciais} alt="" tamanho="mini" />
+                          <span className="lista-nome">{pr.nome}</span>
                           <span className="lista-anos">{pr.mandatos.map(intervalo).join(" · ")}</span>
                         </button>
                       </li>

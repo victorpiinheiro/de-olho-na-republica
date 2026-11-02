@@ -1631,6 +1631,30 @@ h2 {
   font-size: 20px;
 }
 
+/* Foto do presidente: retrato recortado pelo topo (rosto), com iniciais de reserva. */
+.foto-pres {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-weight: 700;
+}
+.foto-pres img { object-fit: cover; object-position: top center; }
+.foto-pres-grande { width: 96px; height: 128px; border-radius: 12px; font-size: 28px; }
+.foto-pres-mini { width: 40px; height: 40px; border-radius: 50%; font-size: 13px; }
+.foto-pres-iniciais { line-height: 1; }
+
+.foto-credito {
+  margin: -8px 0 16px;
+  color: var(--text-2);
+  font-size: 12px;
+}
+.foto-credito a { color: inherit; text-decoration: underline; }
+
 .cartao-nome { flex: 1; min-width: 0; }
 .cartao-nome h2 { margin: 0; }
 .cartao-nome p { margin: 4px 0 0; color: var(--text-2); }
@@ -1708,7 +1732,7 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
   min-height: 44px;
   padding: 6px 10px;
@@ -1719,6 +1743,7 @@ h2 {
   text-align: left;
 }
 
+.lista-nome { flex: 1; min-width: 0; }
 .lista-item-sel { background: var(--accent-bg); font-weight: 600; }
 .lista-anos { color: var(--text-2); font-size: 13px; font-weight: 400; font-variant-numeric: tabular-nums; white-space: nowrap; }
 

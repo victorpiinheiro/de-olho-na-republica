@@ -17,8 +17,15 @@ export const partidoRowSchema = z.object({
 const resposta = <T extends z.ZodType>(row: T) =>
   z.object({ results: z.object({ bindings: z.array(row) }) });
 
+export const fotoRowSchema = z.object({
+  item: valor,
+  foto: valor, // http://commons.wikimedia.org/wiki/Special:FilePath/<arquivo>
+});
+
 export const mandatosSchema = resposta(mandatoRowSchema);
+export const fotosSchema = resposta(fotoRowSchema);
 export const partidosSchema = resposta(partidoRowSchema);
 
 export type MandatoRow = z.infer<typeof mandatoRowSchema>;
 export type PartidoRow = z.infer<typeof partidoRowSchema>;
+export type FotoRow = z.infer<typeof fotoRowSchema>;
