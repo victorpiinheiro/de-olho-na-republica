@@ -213,8 +213,20 @@ Regras:
    tabela ranqueada por gasto com mini-barra, paginação
 3. **Perfil do parlamentar**: cabeçalho, KPIs (cota usada × limite, notas, presença, proposições),
    gasto por categoria, gasto por mês, tabela de despesas com link "Ver nota"
-4. **Leis e votações**: abas (Todas, Viraram lei, Aprovadas na Câmara, Aprovadas no Senado, Rejeitadas),
-   cards com status, código, título, resumo, autor e placar em barra empilhada (ou "votação simbólica")
+4. **Leis e votações**: abas (Todas, Com votos nominais, Viraram lei, Aprovadas na Câmara, Aprovadas no Senado,
+   Rejeitadas), cards com status, código, título, resumo, autor e placar em barra empilhada (ou "votação simbólica").
+   A página (estática, 1 h) traz os 100 primeiros de cada aba; **"Carregar mais"** (100 por vez) e o **filtro por ano da
+   votação mostrada** buscam o resto do banco em `GET /api/leis?aba=&pagina=&ano=` (parâmetros validados em
+   `lib/leis-api.ts`; resposta com cache de 1 h na Vercel). A tela diz "Mostrando N de TOTAL". Em **"Viraram lei" há um
+   card por lei**: os registros da Câmara e do Senado que viraram a MESMA norma (chave = número da norma, normalizando
+   "Lei" e "Lei Ordinária") saem num card só, com "Também votada na outra casa"; nas demais abas não se junta (não há
+   identificador seguro). A escolha da aba, o agrupamento, o ano, a ordem e a página são feitos numa consulta SQL só
+   (`queries/leis.ts`); o card é montado pelas funções de `lib/leis.ts`. **A busca vale para o banco inteiro**
+   (parâmetro `q` de `/api/leis`, com 350 ms de espera ao digitar): cada palavra deve aparecer no código ("PL 2418/2026"
+   ou "PL2418/2026"), na norma, na ementa ou nos autores (nome, partido, UF), sem acento, sem maiúscula e sem ponto de
+   milhar; em "Viraram lei" o card aparece se QUALQUER das casas bater. O texto é o oficial: nem sempre traz o nome popular
+   (a Emenda Constitucional 132/2023 está como "Altera o Sistema Tributário Nacional"). O teste compara o SQL com um
+   cálculo independente em JS
 5. **Detalhe da lei**: resumo, ementa oficial, linha do tempo da tramitação, resultado, autoria,
    tabela de voto por partido, grade de votos nominais filtrável
 6. **Eleições**: filtros de cargo e UF, KPIs de comparecimento 1º → 2º turno, finalistas com barras

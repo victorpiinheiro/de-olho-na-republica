@@ -42,6 +42,9 @@ Site de transparência política. Reúne, em um só lugar, o que o Congresso gas
 - A data exibida para uma lei é a da sanção (Câmara: tramitação "Transformação em Norma Jurídica"; Senado: assinatura da norma).
 - Votação simbólica não tem votos nominais: é um estado próprio, não uma lista vazia.
 - Resumo = campo `ementa` oficial. Não usamos texto gerado por IA.
+- O banco guarda as votações desde fevereiro de 2023 (início da legislatura atual). A página mostra as 100 mais recentes de cada aba, e o botão "Carregar mais" e o filtro por ano buscam o resto do banco, com o total sempre à vista ("Mostrando 100 de 450 leis").
+- A busca procura no banco inteiro (não só no que está na tela): cada palavra deve aparecer no código, na norma, na ementa ou nos autores, sem diferença de acento ou maiúscula. É o texto oficial, que nem sempre usa o nome popular.
+- Em "Viraram lei", uma lei votada na Câmara e no Senado aparece num card só, com o aviso de que também foi votada na outra casa. Nas outras abas isso não é feito, porque não há um identificador seguro que ligue o mesmo projeto nas duas casas.
 
 **Eleições**
 - Só agregados usados na tela (Brasil e UF por candidato), nunca dados por seção eleitoral. O 1º e o 2º turno têm códigos de eleição diferentes no TSE.

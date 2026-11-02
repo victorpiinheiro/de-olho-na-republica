@@ -13,11 +13,18 @@ import {
   type EstadoVotacao,
   type VotacaoResumo,
 } from "@/lib/leis";
+import { termosDaBusca } from "@/lib/leis-api";
 
-const POR_ABA = 100;
+export const POR_ABA = 100;
 
 // Ausente e "presente, sem voto" (Senado) não contam como ter votado na presença.
 export const SEM_VOTO: TipoVoto[] = ["AUSENTE", "PRESENTE_SEM_VOTO"];
+
+export interface OutraCasa {
+  id: number;
+  casa: CasaLegislativa;
+  codigo: string;
+}
 
 export interface CardLei {
   id: number;
@@ -30,6 +37,8 @@ export interface CardLei {
   status: { rotulo: string; tom: "lei" | "rejeitada" | "neutro" };
   autoria: { texto: string; parlamentarId: number | null } | null;
   totalVotacoes: number;
+  // Só em "Viraram lei": a mesma norma também tem registro na outra casa (um card por lei, não por casa).
+  tambem: OutraCasa[];
   destaque: {
     dataIso: string;
     descricao: string;
@@ -62,6 +71,15 @@ function condicaoDaAba(aba: Aba): Prisma.Sql {
   }
 }
 
+// Em "Viraram lei" os registros que viraram A MESMA norma (um da Câmara, um do Senado) formam um grupo e saem num card
+// só. O Senado escreve "Lei 14597/2023" e a Câmara "Lei Ordinária 14597/2023": é a mesma lei, então normaliza.
+// Nas outras abas não há um identificador seguro que ligue o mesmo projeto nas duas casas: cada registro é um grupo.
+function chaveDoGrupo(aba: Aba): Prisma.Sql {
+  return aba === "viraram-lei"
+    ? Prisma.sql`COALESCE(regexp_replace(p."normaJuridica", '^Lei Ordinária', 'Lei'), 'id:' || p.id::text)`
+    : Prisma.sql`p.id::text`;
+}
+
 interface LinhaLei {
   id: number;
   casa: CasaLegislativa;
@@ -78,37 +96,103 @@ interface LinhaLei {
   autorPartido: string | null;
   autorUf: string | null;
   totalAutores: number;
+  total: number;
+  anos: number[];
+  tambem: OutraCasa[] | null;
   votacoes: (Omit<VotacaoResumo, "data"> & { data: string })[];
 }
 
+export interface OpcoesLeis {
+  offset?: number;
+  limite?: number;
+  ano?: number | null; // só as cuja votação mostrada no card (a nominal mais recente) foi nesse ano
+  busca?: string | null; // texto digitado: cada palavra tem de aparecer no código, na norma, na ementa ou nos autores
+}
+
+// Mesma normalização de lib/leis-api.ts (normalizarBusca), feita no banco: sem acento, minúscula, sem ponto de milhar.
+// A lista cobre todo caractere acentuado que existe nos textos (conferido no banco: o resto é º, §, aspas etc.).
+const COM_ACENTO = "áàâãäéèêëíìîïóòôõöúùûüçñ";
+const SEM_ACENTO = "aaaaaeeeeiiiiooooouuuucn";
+const normalizadoNoBanco = (texto: Prisma.Sql) =>
+  Prisma.sql`replace(lower(translate(${texto}, ${COM_ACENTO + COM_ACENTO.toUpperCase()}, ${SEM_ACENTO + SEM_ACENTO})), '.', '')`;
+
+// Texto em que a busca procura: código ("PL 2418/2026" e "PL2418/2026"), norma, ementa e autores (nome, partido e UF).
+const TEXTO_DA_PROPOSICAO = Prisma.sql`p."siglaTipo" || ' ' || p.numero || '/' || p.ano || ' ' || p."siglaTipo" || p.numero || '/' || p.ano
+  || ' ' || COALESCE(p."normaJuridica", '') || ' ' || p.ementa || ' ' || COALESCE(au.texto, '')`;
+
+const JUNTA_AUTORES = Prisma.sql`LEFT JOIN LATERAL (
+  SELECT string_agg(a.nome || ' ' || COALESCE(pa.partido, '') || ' ' || COALESCE(pa.uf, ''), ' ') AS texto
+  FROM "Autor" a LEFT JOIN "Parlamentar" pa ON pa.id = a."parlamentarId"
+  WHERE a."proposicaoId" = p.id
+) au ON TRUE`;
+
+export interface PaginaLeis {
+  cards: CardLei[];
+  total: number; // quantas existem na aba (e no ano, se filtrado), e não só nesta página
+  anos: number[]; // anos das votações mostradas nos cards da aba, do mais recente para o mais antigo (alimenta o filtro)
+}
+
+// Uma página de proposições da aba, da votação mais recente para a mais antiga, numa única consulta (cada ida ao banco
+// custa ~1 s de distância em desenvolvimento). O filtro, o agrupamento, o ano, a ordem e a página ficam no banco; o
+// card segue sendo montado pelas funções de lib/leis.ts a partir das votações da proposição.
+//
 // Votações no mesmo horário (comum no Senado) não têm ordem entre si na fonte: vale a de maior id, no banco e aqui
 // (as votações chegam ordenadas assim, e a ordenação do código é estável). Assim a aba e o selo do card sempre concordam.
-// As POR_ABA proposições da aba com a votação mais recente, numa única consulta (cada ida ao banco custa ~1 s
-// de distância em desenvolvimento). O filtro e a ordem ficam no banco; o card segue sendo montado pelas
-// funções de lib/leis.ts a partir das votações da proposição.
-export async function listarLeis(aba: Aba): Promise<CardLei[]> {
+export async function listarLeis(aba: Aba, { offset = 0, limite = POR_ABA, ano = null, busca = null }: OpcoesLeis = {}): Promise<PaginaLeis> {
+  // Busca: o registro "casa" se TODAS as palavras aparecem no texto dele. Em "Viraram lei" o grupo (Câmara + Senado da
+  // mesma norma) aparece se QUALQUER registro dele casar, e o card mostra o grupo inteiro.
+  const termos = busca ? termosDaBusca(busca) : [];
+  const casou =
+    termos.length === 0
+      ? Prisma.sql`TRUE`
+      : Prisma.sql`(${Prisma.join(termos.map((t) => Prisma.sql`strpos(${normalizadoNoBanco(TEXTO_DA_PROPOSICAO)}, ${t}) > 0`), " AND ")})`;
+  const juntaAutores = termos.length === 0 ? Prisma.empty : JUNTA_AUTORES;
+  const filtroAno = ano === null ? Prisma.sql`TRUE` : Prisma.sql`extract(year FROM destaque_data)::int = ${ano}::int`;
   const linhas = await db.$queryRaw<LinhaLei[]>`
     WITH v AS (
       SELECT "proposicaoId" AS pid,
              max(data) AS ultima_data,
+             -- data da votação que o card mostra (lib/leis.ts votacaoDestaque): a mais recente com placar nominal, senão a mais recente
+             COALESCE(max(data) FILTER (WHERE NOT simbolica AND NOT secreta), max(data)) AS destaque_data,
              bool_or(NOT simbolica AND NOT secreta AND "votosSim" + "votosNao" + "votosAbstencao" > 0) AS tem_nominal,
              (array_agg(aprovada ORDER BY data DESC, id DESC))[1] AS ultima_aprovada
       FROM "Votacao"
       WHERE "proposicaoId" IS NOT NULL
       GROUP BY "proposicaoId"
     ),
-    sel AS (
-      SELECT p.id, v.ultima_data
+    cand AS (
+      SELECT p.id, v.ultima_data, v.destaque_data, ${chaveDoGrupo(aba)} AS grupo, ${casou} AS casou
       FROM "Proposicao" p
       JOIN v ON v.pid = p.id
+      ${juntaAutores}
       WHERE ${condicaoDaAba(aba)}
-      ORDER BY v.ultima_data DESC, p.id DESC
-      LIMIT ${POR_ABA}
+    ),
+    marcadas AS (
+      SELECT *, bool_or(casou) OVER (PARTITION BY grupo) AS grupo_casou FROM cand
+    ),
+    primarias AS (
+      SELECT DISTINCT ON (grupo) id, ultima_data, destaque_data, grupo, grupo_casou
+      FROM marcadas
+      ORDER BY grupo, ultima_data DESC, id DESC
+    ),
+    sel AS (
+      SELECT id, ultima_data, grupo,
+             count(*) OVER ()::int AS total,
+             (SELECT array_agg(DISTINCT extract(year FROM destaque_data)::int) FROM primarias) AS anos
+      FROM primarias
+      WHERE grupo_casou AND ${filtroAno}
+      ORDER BY ultima_data DESC, id DESC
+      LIMIT ${limite} OFFSET ${offset}
     )
     SELECT p.id, p.casa::text AS casa, p."siglaTipo", p.numero, p.ano, p.ementa, p.situacao, p."virouLei", p."normaJuridica",
            a.nome AS "autorNome", a.tipo AS "autorTipo", a."parlamentarId" AS "autorParlamentarId",
            pa.partido AS "autorPartido", pa.uf AS "autorUf",
            (SELECT count(*)::int FROM "Autor" WHERE "proposicaoId" = p.id) AS "totalAutores",
+           sel.total, sel.anos,
+           (SELECT jsonb_agg(jsonb_build_object('id', o.id, 'casa', o.casa::text, 'codigo', o."siglaTipo" || ' ' || o.numero || '/' || o.ano)
+                             ORDER BY c.ultima_data DESC, o.id DESC)
+              FROM cand c JOIN "Proposicao" o ON o.id = c.id
+             WHERE c.grupo = sel.grupo AND c.id <> sel.id) AS tambem,
            (SELECT jsonb_agg(jsonb_build_object(
                      'data', to_char(vt.data, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),
                      'descricao', vt.descricao, 'aprovada', vt.aprovada, 'simbolica', vt.simbolica, 'secreta', vt.secreta,
@@ -123,7 +207,7 @@ export async function listarLeis(aba: Aba): Promise<CardLei[]> {
     LEFT JOIN "Parlamentar" pa ON pa.id = a."parlamentarId"
     ORDER BY sel.ultima_data DESC, p.id DESC`;
 
-  return linhas.map((p) => {
+  const cards = linhas.map((p) => {
     const votacoes: VotacaoResumo[] = (p.votacoes ?? []).map((x) => ({ ...x, data: new Date(x.data) }));
     const d = votacaoDestaque(votacoes);
     return {
@@ -146,6 +230,7 @@ export async function listarLeis(aba: Aba): Promise<CardLei[]> {
               parlamentarId: p.autorParlamentarId,
             },
       totalVotacoes: votacoes.length,
+      tambem: p.tambem ?? [],
       destaque: d && {
         dataIso: d.data.toISOString(),
         descricao: d.descricao,
@@ -157,6 +242,8 @@ export async function listarLeis(aba: Aba): Promise<CardLei[]> {
       },
     };
   });
+  const anos = [...(linhas[0]?.anos ?? [])].sort((x, y) => y - x);
+  return { cards, total: linhas[0]?.total ?? 0, anos };
 }
 
 export interface VotoLinha {

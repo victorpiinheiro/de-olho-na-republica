@@ -5,6 +5,8 @@ import { dataBr } from "@/lib/format";
 import { NOME_CASA, rotuloResultado } from "@/lib/leis";
 import type { CardLei as Card } from "@/lib/queries/leis";
 
+const NA_CASA = { CAMARA: "na Câmara", SENADO: "no Senado" } as const;
+
 export function CardLei({ lei }: { lei: Card }) {
   const d = lei.destaque;
   return (
@@ -26,6 +28,17 @@ export function CardLei({ lei }: { lei: Card }) {
       {d && (
         <p className="lei-votacao">
           Votação: {rotuloResultado(d.aprovada)} — {d.descricao}
+        </p>
+      )}
+
+      {lei.tambem.length > 0 && (
+        <p className="lei-tambem">
+          Também votada {lei.tambem.map((t, i) => (
+            <span key={t.id}>
+              {i > 0 && ", "}
+              {NA_CASA[t.casa]} (<Link href={`/leis/proposicao/${t.id}`}>{t.codigo === lei.codigo ? "ver votação" : t.codigo}</Link>)
+            </span>
+          ))}
         </p>
       )}
 

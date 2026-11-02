@@ -1865,10 +1865,48 @@ h2 {
   border-radius: 12px;
 }
 
-.card-link .lei-autor a {
+.card-link .lei-autor a,
+.card-link .lei-tambem a {
   position: relative;
   z-index: 1;
 }
+
+.lei-tambem {
+  margin: 0 0 12px;
+  color: var(--text-2);
+  font-size: 14px;
+}
+
+.lei-tambem a { color: var(--accent); }
+
+.mais-leis {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.botao-secundario {
+  min-height: 44px;
+  padding: 0 20px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.botao-secundario:hover:not(:disabled) { background: var(--accent-bg); }
+.botao-secundario:disabled { opacity: 0.6; cursor: progress; }
+.botao-secundario:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.mais-leis-erro { color: var(--voto-nao); font-size: 14px; }
+
+.dica-busca { margin: -4px 0 12px; color: var(--text-2); font-size: 13px; }
+.lista-leis[aria-busy="true"] { opacity: 0.55; transition: opacity 0.15s; }
 
 .lei-placar {
   display: flex;
