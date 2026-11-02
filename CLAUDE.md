@@ -89,7 +89,7 @@ O front NUNCA chama APIs do governo diretamente: lê do nosso banco.
 ### Jobs: GitHub Actions
 - Um workflow com `on: schedule` por grupo de frequência, rodando `tsx src/jobs/<job>.ts`.
 - Secrets no GitHub: `DATABASE_URL`, `REVALIDATE_SECRET`, `SITE_URL`, URLs dos CSVs.
-- Variáveis na Vercel: `DATABASE_URL`, `DIRECT_URL`, `REVALIDATE_SECRET`.
+- Variáveis na Vercel: `DATABASE_URL`, `DIRECT_URL`, `REVALIDATE_SECRET`, `PIX_COPIA_E_COLA`, `APOIE_AUTOR` (as duas últimas só para a página /apoie).
 - Nenhuma variável sensível com prefixo `NEXT_PUBLIC_`.
 - Os jobs frequentes também mantêm o Supabase ativo; se pararem, o banco pausa. Por isso, alerta de falha é obrigatório.
 
@@ -223,6 +223,11 @@ Regras:
    República de 1946, Regime militar, Nova República), lista de presidentes agrupada por período,
    cartão do presidente (foto com crédito, períodos no cargo, duração, partido ou filiações, fontes).
    Sem texto de IA, sem chegada/saída/vice (decisão da Etapa 8)
+8. **Apoie o projeto** (`/apoie`): QR code e "Pix copia e cola" para doação, texto honesto de que o dinheiro vai para o autor
+   (sem contrapartida, sem influência nos dados). O código Pix é o ESTÁTICO gerado pelo banco (chave aleatória), lido da
+   variável `PIX_COPIA_E_COLA` (mais `APOIE_AUTOR` para o nome do texto): nada disso vai ao git (repo público). `lib/pix.ts`
+   só VALIDA o código (CRC16, QR estático, sem valor fixo, conta br.gov.bcb.pix) e o build FALHA se for inválido; sem a
+   variável a página e o link do menu não existem. QR gerado no servidor com `qrcode` (SVG). Variáveis também na Vercel
 
 ---
 

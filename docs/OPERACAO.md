@@ -41,7 +41,7 @@ Cadastre em **Settings → Secrets and variables → Actions**.
 
 Pelo terminal, lendo do `.env` sem expor o valor: `gh secret set DATABASE_URL < <(grep '^DATABASE_URL=' .env | cut -d= -f2- | tr -d '"')`.
 
-Na **Vercel** (Project → Settings → Environment Variables): `DATABASE_URL`, `DIRECT_URL`, `REVALIDATE_SECRET`. Nenhuma variável sensível com prefixo `NEXT_PUBLIC_`.
+Na **Vercel** (Project → Settings → Environment Variables): `DATABASE_URL`, `DIRECT_URL`, `REVALIDATE_SECRET`, e para a página de doação `PIX_COPIA_E_COLA` (o "Pix copia e cola" ESTÁTICO do banco, entre aspas) e `APOIE_AUTOR` (nome mostrado no texto). Sem `PIX_COPIA_E_COLA`, a página `/apoie` e o link no menu não existem; com ele inválido, o build falha de propósito. Os workflows do GitHub não usam essas duas variáveis. Nenhuma variável sensível com prefixo `NEXT_PUBLIC_`.
 
 Enquanto `SITE_URL` não existir, o passo "Atualizar páginas" só registra um aviso e o workflow continua verde. **Depois do deploy, cadastre `SITE_URL`**: sem ele, as páginas só mostram dado novo no próximo deploy.
 

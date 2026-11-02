@@ -25,7 +25,7 @@ const itens = [
 
 // Telas largas: menu fixo à esquerda. Celular (até 800 px): barra no topo com o botão de hambúrguer e o menu como
 // gaveta lateral. A gaveta fecha ao navegar (inclusive pelo botão "voltar"), com Esc, no fundo escurecido e no X.
-export function Sidebar() {
+export function Sidebar({ mostrarApoie = false }: { mostrarApoie?: boolean }) {
   const pathname = usePathname();
   const [aberto, setAberto] = useState(false);
   // Ao mudar de página (link, "voltar" ou "avançar") a gaveta fecha. É o padrão do React para ajustar estado
@@ -121,6 +121,11 @@ export function Sidebar() {
         <div className="sidebar-rodape">
           <p className="nav-titulo">FONTES</p>
           <p>Câmara dos Deputados · Senado Federal</p>
+          {mostrarApoie && (
+            <Link href="/apoie" className="apoie-link" aria-current={pathname.startsWith("/apoie") ? "page" : undefined}>
+              Apoie o projeto
+            </Link>
+          )}
         </div>
       </aside>
     </>

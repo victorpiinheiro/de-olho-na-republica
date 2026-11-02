@@ -18,6 +18,7 @@ Site de transparência política. Reúne, em um só lugar, o que o Congresso gas
 | **Eleições 2026** | Resultados do 1º e do 2º turno, comparação entre os dois, comparecimento, finalistas e virada por UF | TSE, resultados oficiais (`resultados.tse.jus.br`) |
 | **História do país** | Linha do tempo dos presidentes desde 1889, agrupados por período, com foto, mandatos e partido | Wikidata (consulta SPARQL: cargo de Presidente do Brasil e foto) e Wikimedia Commons (autor e licença da foto) |
 | **Orçamento** | Despesa da União por função de governo (Saúde, Educação, Previdência...) e subfunção, executado × previsto | Tesouro Nacional, API Siconfi (RREO Anexo 02, ente União) |
+| **Apoie o projeto** | Doação por Pix (QR code e "copia e cola"), com o texto de que o valor vai para o autor | Código Pix gerado pelo banco do autor (variável de ambiente, fora do git) |
 
 ### Como ler cada tela
 
@@ -131,6 +132,8 @@ Outros comandos: `npm test` (testes), `npm run typecheck`, `npm run lint`, `npm 
 | `DATABASE_URL` | Conexão do app e dos jobs (pooler, porta 6543) |
 | `DIRECT_URL` | Só migrations (conexão direta, porta 5432) |
 | `REVALIDATE_SECRET` | Protege a rota `POST /api/revalidate` |
+| `PIX_COPIA_E_COLA` | (opcional) Pix copia e cola estático do seu banco, para a página `/apoie`; sem ele a página não existe |
+| `APOIE_AUTOR` | (opcional) Nome mostrado no texto da página `/apoie` |
 | `CAMARA_DESPESAS_CSV_URL` | CSV anual de despesas da Câmara; `{ano}` é substituído |
 | `SENADO_CEAPS_URL` | API de despesas dos senadores (CEAPS); `{ano}` é substituído |
 | `RECEITA_ANALISE_URL` | Relatório de arrecadação da Receita Federal |
