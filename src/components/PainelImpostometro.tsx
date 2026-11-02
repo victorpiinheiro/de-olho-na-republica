@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { DetalheEstadual, DetalheFederal } from "@/components/DetalheTributos";
 import { PainelOficial } from "@/components/PainelOficial";
 import { PainelProjecao } from "@/components/PainelProjecao";
 import { montarSerie } from "@/lib/impostometro";
@@ -9,9 +10,9 @@ import type { ImpostometroCompleto } from "@/lib/queries/impostometro";
 import { nomeUf } from "@/lib/ufs";
 
 const ROTULO_ESFERA: Record<EsferaTela, string> = {
-  total: "tributos federais e estaduais",
+  total: "tributos federais (brutos) e estaduais (líquidos de repasses)",
   federal: "tributos federais",
-  estadual: "tributos estaduais",
+  estadual: "tributos estaduais (líquidos de repasses)",
 };
 
 // Esfera e estados valem para os dois blocos: dados oficiais (recortes por mês/bimestre) e projeção (contador).
@@ -40,8 +41,8 @@ export function PainelImpostometro({ completo }: { completo: ImpostometroComplet
   const escopo = !filtrando
     ? ROTULO_ESFERA[esfera]
     : ufsOff.size <= 5
-      ? `tributos estaduais, sem ${[...ufsOff].sort().join(", ")}`
-      : `tributos de ${selecionadas.length} estado${selecionadas.length > 1 ? "s" : ""}`;
+      ? `tributos estaduais líquidos de repasses, sem ${[...ufsOff].sort().join(", ")}`
+      : `tributos líquidos de repasses de ${selecionadas.length} estado${selecionadas.length > 1 ? "s" : ""}`;
 
   return (
     <>
@@ -91,6 +92,10 @@ export function PainelImpostometro({ completo }: { completo: ImpostometroComplet
         esfera={esfera}
         ufs={filtrando ? new Set(selecionadas) : null}
       />
+      {esfera !== "estadual" && completo.detalhe.federal && <DetalheFederal d={completo.detalhe.federal} />}
+      {esfera !== "federal" && completo.detalhe.estadual && (
+        <DetalheEstadual d={completo.detalhe.estadual} ufs={filtrando ? new Set(selecionadas) : null} />
+      )}
       <PainelProjecao dados={dadosProjecao} escopo={escopo} />
     </>
   );

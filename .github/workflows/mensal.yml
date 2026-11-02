@@ -1,4 +1,4 @@
-name: Mensal (arrecadação e orçamento)
+name: Mensal (arrecadação, detalhe por tributo e orçamento)
 
 # Dia 5 de cada mês às 6h de Brasília (9h UTC). O Siconfi sai por bimestre: nos outros meses
 # os jobs só confirmam que não há dado novo.
@@ -35,6 +35,12 @@ jobs:
       - name: Orçamento da União (Siconfi)
         if: ${{ !cancelled() }}
         run: npx tsx --tsconfig tsconfig.json src/jobs/sync-orcamento.ts
+      - name: Arrecadação federal por tributo (Receita, Tabela I e VII)
+        if: ${{ !cancelled() }}
+        run: npx tsx --tsconfig tsconfig.json src/jobs/sync-arrecadacao-detalhe.ts
+      - name: Receita estadual bruta por imposto (DCA, anual)
+        if: ${{ !cancelled() }}
+        run: npx tsx --tsconfig tsconfig.json src/jobs/sync-receita-estadual.ts
       - name: Atualizar páginas
         if: ${{ success() }}
         run: npx tsx --tsconfig tsconfig.json src/jobs/revalidar.ts '/impostometro' '/orcamento'

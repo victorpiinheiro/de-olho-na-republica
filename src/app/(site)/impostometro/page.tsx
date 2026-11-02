@@ -9,7 +9,7 @@ const PASSOS = [
     n: "01",
     titulo: "Dados oficiais",
     texto:
-      "Federal: arrecadação mensal da Receita Federal (relatório “Análise da Arrecadação das Receitas Federais”). Estadual: impostos e taxas dos 26 estados e do DF, no Relatório Resumido da Execução Orçamentária (RREO) do Tesouro Nacional, que é bimestral — cada bimestre é dividido em dois meses iguais. Tudo importado automaticamente.",
+      "Federal: arrecadação mensal da Receita Federal (relatório “Análise da Arrecadação das Receitas Federais”), por tributo, em valor bruto. Estadual: impostos e taxas dos 26 estados e do DF no Relatório Resumido da Execução Orçamentária (RREO) do Tesouro Nacional, que é bimestral (cada bimestre é dividido em dois meses iguais) e vem líquido de repasses. O detalhe bruto por imposto (ICMS, IPVA, ITCMD) vem da Declaração de Contas Anuais (DCA) do Tesouro, que é anual. Tudo importado automaticamente.",
   },
   {
     n: "02",
@@ -54,8 +54,11 @@ export default async function Page() {
         </ol>
         <p className="metodologia-nota">
           Federal: receitas administradas pela Receita Federal (impostos, contribuições e receita previdenciária).
-          Estadual: impostos e taxas (receita realizada) dos estados e do DF; o Total soma as duas esferas sem ajustar
-          eventual sobreposição entre elas. Os dados estaduais saem com mais atraso que os federais, então o Total
+          Estadual: impostos e taxas (receita realizada) dos estados e do DF. <strong>Bruto e líquido:</strong> o Federal é
+          bruto. O Estadual do bloco “Dados oficiais” (RREO) é líquido dos repasses constitucionais aos municípios e do
+          FUNDEB, e cada estado contabiliza essas deduções de um jeito; o bruto está no bloco “Estadual por imposto”
+          (DCA, anual). Por isso o Total soma um Federal bruto com um Estadual líquido, e subestima o total arrecadado
+          pelos estados. O Total também não ajusta eventual sobreposição entre as esferas. Os dados estaduais saem com mais atraso que os federais, então o Total
           usa só o período que as duas esferas já divulgaram e projeta o restante. Não inclui tributos municipais
           (ISS, IPTU etc.): o Tesouro Nacional publica esses dados de forma incompleta, e um total parcial poderia ser
           confundido com o total do país. A variação real (IPCA) existe só para a esfera federal, calculada pela própria Receita.

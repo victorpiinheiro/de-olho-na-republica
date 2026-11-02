@@ -1,5 +1,5 @@
 import { fetchWithRetry } from "../../http";
-import { despesasSchema, entesSchema, rreoSchema, type LinhaDespesa, type LinhaRreo } from "./schemas";
+import { dcaSchema, despesasSchema, entesSchema, rreoSchema, type LinhaDca, type LinhaDespesa, type LinhaRreo } from "./schemas";
 
 const BASE = "https://apidatalake.tesouro.gov.br/ords/siconfi/tt";
 
@@ -50,5 +50,13 @@ export async function buscarDespesasUniao(ano: number, bimestre: number): Promis
   });
   const r = despesasSchema.parse(await getJson(`${BASE}/rreo?${params}`));
   if (r.hasMore) throw new Error("RREO-Anexo 02 paginado: o cliente não segue páginas");
+  return r.items;
+}
+
+// DCA Anexo I-C (receita orçamentária anual, bruta e com deduções) de um estado. Vazio = DCA do ano ainda não enviada.
+export async function buscarDcaReceita(ano: number, codIbge: number): Promise<LinhaDca[]> {
+  const params = new URLSearchParams({ an_exercicio: String(ano), no_anexo: "DCA-Anexo I-C", id_ente: String(codIbge) });
+  const r = dcaSchema.parse(await getJson(`${BASE}/dca?${params}`));
+  if (r.hasMore) throw new Error(`DCA de ${codIbge} paginada: o cliente não segue páginas`);
   return r.items;
 }

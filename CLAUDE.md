@@ -102,7 +102,9 @@ O front NUNCA chama APIs do governo diretamente: lê do nosso banco.
 | Lista de parlamentares | 1x/semana |
 | Tamanho do banco | 1x/semana |
 | Arrecadação | mensal (dia 5) |
-| Arrecadação estadual (Siconfi) | mensal |
+| Arrecadação estadual (Siconfi, RREO) | mensal |
+| Detalhe federal por tributo (Receita, Tabelas I e VII) | mensal |
+| Receita estadual bruta por imposto (Siconfi, DCA anual) | mensal (só traz dado novo quando a DCA do ano sai, ~abril) |
 | Orçamento da União (Siconfi) | mensal (o RREO sai a cada bimestre) |
 | Eleições 2026 | carga única, rodada manualmente (workflow_dispatch) |
 
@@ -116,7 +118,9 @@ O front NUNCA chama APIs do governo diretamente: lê do nosso banco.
 | Verbas dos senadores (CEAPS) | Portal de transparência do Senado | CSV anual (URL em env) |
 | Eleições 2026 | https://resultados.tse.jus.br/oficial/comum/config/ele-c.json | JSON; 1º e 2º turno têm códigos de eleição diferentes |
 | Histórico eleitoral | Portal de Dados Abertos do TSE | CSV/ZIP, carga única (opcional) |
-| Arrecadação | Receita Federal / Tesouro Nacional | CSV/planilha mensal |
+| Arrecadação federal | Receita Federal, relatório mensal "Análise da Arrecadação" (PDF): Tabela III (série mensal por categoria), Tabela I (por tributo, 3 colunas: mês, mês anterior, mesmo mês do ano anterior) e Tabela VII (por base de incidência, anual) | PDF mensal, lido com `pdftotext` |
+| Arrecadação estadual, líquida | Siconfi, `rreo` Anexo 01, 27 estados | REST JSON, bimestral, **líquida** de repasses a municípios e FUNDEB |
+| Receita estadual, bruta por imposto | Siconfi, `dca` com `no_anexo=DCA-Anexo I-C` (ICMS, IPVA, ITCMD, IR retido, taxas, com 3 colunas de dedução) | REST JSON, **anual** (a do ano N sai por volta de abril de N+1) |
 | Orçamento da União (função/subfunção) | Siconfi, `rreo` com `no_anexo=RREO-Anexo 02` e `id_ente=1` | REST JSON, bimestral, acumulado no ano |
 | Presidentes (mandatos, partido) | Wikidata (SPARQL, `P39` = Q5176750) | JSON, carga única; confirmar a Galeria de Presidentes da Biblioteca da Presidência |
 
@@ -138,8 +142,17 @@ GET /proposicoes/{id}/autores
 - esferas: Federal (Receita, mensal) e Estadual (Siconfi/RREO, bimestral, por UF). Total = Federal + Estadual
 - NÃO incluir Municipal: o RREO municipal sai incompleto (~60% dos municípios, ~90% da população, numa amostra
   de 40) e exige 5.570 chamadas por bimestre. Um total parcial seria lido como o total do país. Só reavaliar com
-  dado completo (ex.: DCA anual do Tesouro, ainda não sondada)
+  dado completo (a DCA anual do Tesouro já é usada para os estados; a municipal não foi sondada)
 - dados oficiais e projeção ficam em blocos separados; o contador é sempre rotulado "projeção"
+- **Bruto × líquido (decisão da Etapa 7+):** o Federal é BRUTO. O Estadual do RREO é LÍQUIDO das deduções
+  (repasses constitucionais aos municípios, FUNDEB e outras), e cada estado contabiliza as deduções de um jeito
+  (nacional 2025: R$ 805 bi no RREO contra R$ 1.155 bi brutos na DCA). Por isso: o RREO é rotulado "líquido de
+  repasses" na tela; o bruto por imposto vem da DCA, em bloco próprio (anual); e o Total soma Federal bruto +
+  Estadual líquido, com esse rótulo. DCA líquida = RREO acumulado do ano em 26 dos 27 estados (RJ difere ~R$ 2,5 bi;
+  o job só registra aviso). O CONFAZ (boletim do ICMS por estado e mês) NÃO serve: parou em maio/2019
+- categorias por base de incidência usam a taxonomia da Receita (renda e propriedade, folha de salários, bens e
+  serviços, transações financeiras, outros): Federal pela Tabela VII; Estadual derivado da DCA (IPVA, ITCMD e IR
+  retido em renda e propriedade; ICMS em bens e serviços; taxas em outros)
 
 **Resumo das leis:**
 - padrão: campo `ementa` oficial
@@ -187,8 +200,10 @@ Regras:
 
 ## Telas
 1. **Impostômetro**: contador grande animado, filtro por esfera (Total/Federal/Estadual) e por UF,
-   bloco "Dados oficiais" (recorte por mês/bimestre/acumulado, filtro de tributo, KPIs, barras, por tributo, sem projeção)
-   e bloco "Projeção em tempo real" (contador animado, rotulado como projeção), bloco de metodologia
+   bloco "Dados oficiais" (recorte por mês/bimestre/acumulado, filtro de tributo, KPIs, barras, por tributo, sem projeção),
+   blocos de detalhe ("Federal por tributo" mensal e bruto, "Estadual por imposto" anual e bruto, e por base de
+   incidência, árvores expansíveis) e bloco "Projeção em tempo real" (contador animado, rotulado como projeção),
+   bloco de metodologia com o aviso de bruto × líquido
 2. **Parlamentares**: alternância Câmara/Senado, busca + filtros (UF, partido, ordenação), KPIs,
    tabela ranqueada por gasto com mini-barra, paginação
 3. **Perfil do parlamentar**: cabeçalho, KPIs (cota usada × limite, notas, presença, proposições),

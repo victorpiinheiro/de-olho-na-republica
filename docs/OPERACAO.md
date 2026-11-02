@@ -17,7 +17,7 @@ GitHub Actions (cron) ──► jobs gravam no Supabase ──► POST /api/reva
 | `votacoes.yml` | de hora em hora, 8h–20h, seg–sex | votações da Câmara e do Senado (últimos 2 dias) |
 | `diario.yml` | todo dia, 3h | despesas da Câmara, CEAPS, proposições da Câmara e do Senado |
 | `semanal.yml` | domingo, 4h | deputados, senadores, tamanho do banco |
-| `mensal.yml` | dia 5, 6h | arrecadação federal, arrecadação estadual, orçamento |
+| `mensal.yml` | dia 5, 6h | arrecadação federal e estadual, orçamento, detalhe federal por tributo, receita estadual bruta por imposto (DCA) |
 | `carga-unica.yml` | só manual | `sync-eleicoes` ou `sync-presidentes` (escolhido na hora) |
 
 - Todos têm `workflow_dispatch`: Actions → escolher o workflow → **Run workflow**.

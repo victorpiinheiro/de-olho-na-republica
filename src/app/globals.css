@@ -1329,7 +1329,7 @@ h2 {
 
 @media (max-width: 1000px) {
   .impostometro-graficos {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr); /* "1fr" deixa o gráfico de 12 meses alargar a coluna no celular */
   }
 }
 
@@ -1793,10 +1793,37 @@ h2 {
 
 .orc-nome { grid-area: nome; font-weight: 500; }
 .orc-nome::before { content: "▸"; display: inline-block; width: 18px; color: var(--text-2); }
-.orc-funcao[open] .orc-nome::before { content: "▾"; }
+.orc-funcao[open] > summary > .orc-nome::before { content: "▾"; }
 .orc-valor { grid-area: valor; color: var(--text-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .orc-barra { grid-area: barra; }
 
 .orc-detalhe { padding: 4px 4px 16px 22px; }
 .orc-nota { margin: 0 0 8px; color: var(--text-2); font-size: 14px; }
 .orc-subs { margin-top: 8px; }
+
+.nota-liquido {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+/* Detalhe por tributo: reaproveita as listas "orc-*"; a linha sem filhos não tem seta nem é clicável. */
+.orc-funcao.det-folha {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "nome valor" "barra barra";
+  align-items: center;
+  gap: 4px 16px;
+  min-height: 44px;
+  padding: 10px 4px;
+}
+.det-folha .orc-nome::before { content: ""; }
+
+.det-pilha {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+}

@@ -46,3 +46,19 @@ export async function baixarUltimaAnalise(modelo: string, agora = new Date()): P
   }
   throw new Error(`nenhum relatório da Receita nos últimos ${MESES_PARA_TRAS} meses`);
 }
+
+// Relatório de um mês específico. Devolve null se ainda não existe (403/404) ou se o endereço daquele mês
+// não segue o padrão (alguns relatórios de 2025 estão em outro endereço): quem chama junta as 3 colunas de
+// cada Tabela I e cobre os meses que faltam com os relatórios vizinhos.
+export async function baixarAnalisePorMes(modelo: string, ano: number, mes: number): Promise<Uint8Array | null> {
+  const url = urlDaAnalise(modelo, ano, mes);
+  try {
+    return await fetchBytes(url, { retries: 3 });
+  } catch (e) {
+    if (e instanceof HttpError && (e.status === 403 || e.status === 404)) {
+      log("info", "relatório não encontrado", { url, status: e.status });
+      return null;
+    }
+    throw e;
+  }
+}

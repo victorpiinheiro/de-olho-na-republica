@@ -1,0 +1,49 @@
+                                                               TABELA I
+                                                 ARRECADAÇÃO DAS RECEITAS FEDERAIS
+                                        PERÍODO: JANEIRO DE 2026 E JANEIRO E DEZEMBRO DE 2025
+                                                        (A PREÇOS CORRENTES)
+UNIDADE: R$ MILHÕES
+                                                                   2026                2025                 VARIAÇÃO (%)
+                             RECEITAS                                                                     JAN/26   JAN/26
+                                                                 JANEIRO        DEZEMBRO      JANEIRO
+                                                                                                          DEZ/25   JAN/25
+IMPOSTO SOBRE IMPORTAÇÃO                                              7.729         7.666         8.725       0,82    (11,42)
+I.P.I-TOTAL                                                           7.527         7.896         7.519      (4,67)      0,12
+  I.P.I-FUMO                                                          1.022           809           956      26,31       6,94
+  I.P.I-BEBIDAS                                                         358           314           317      13,73      12,70
+  I.P.I-AUTOMÓVEIS                                                      412           427           567      (3,65)    (27,36)
+  I.P.I-VINCULADO À IMPORTAÇÃO                                        2.626         2.872         2.904      (8,57)     (9,55)
+  I.P.I-OUTROS                                                        3.110         3.473         2.776     (10,46)     12,05
+IMPOSTO SOBRE A RENDA-TOTAL                                         123.764        90.338       113.728     37,00       8,82
+ I.RENDA-PESSOA FÍSICA                                                3.193         4.970         2.701    (35,76)     18,22
+ I.RENDA-PESSOA JURÍDICA                                             64.890        18.455        62.945    251,62       3,09
+   ENTIDADES FINANCEIRAS                                             10.868         1.708        11.261    536,46      (3,49)
+   DEMAIS EMPRESAS                                                   54.022        16.747        51.684    222,57       4,52
+ I.RENDA-RETIDO NA FONTE                                             55.681        66.912        48.082    (16,79)     15,81
+   I.R.R.F-RENDIMENTOS DO TRABALHO                                   29.107        20.204        26.735     44,06       8,87
+   I.R.R.F-RENDIMENTOS DE CAPITAL                                    14.683        32.701        10.606    (55,10)     38,45
+   I.R.R.F-RENDIMENTOS DE RESIDENTES NO EXTERIOR                      9.182        11.906         8.545    (22,88)      7,45
+   I.R.R.F-OUTROS RENDIMENTOS                                         2.709         2.101         2.196     28,94      23,36
+IOF - I. S/ OPERAÇÕES FINANCEIRAS                                     8.009         8.669         5.145      (7,61)    55,67
+ITR - I. TERRITORIAL RURAL                                                66         246           288      (73,00)    (76,96)
+COFINS - CONTRIB. P/ A SEGURIDADE SOCIAL                             44.088        40.625        40.390      8,53       9,16
+ ENTIDADES FINANCEIRAS                                                2.772         2.551         2.540      8,68       9,12
+ DEMAIS EMPRESAS                                                     41.316        38.074        37.850      8,52       9,16
+CONTRIBUIÇÃO PARA O PIS/PASEP                                        11.917        10.724        11.000     11,12       8,34
+ ENTIDADES FINANCEIRAS                                                  435           406           431      6,94       0,74
+ DEMAIS EMPRESAS                                                     11.482        10.318        10.568     11,28       8,65
+CSLL - CONTRIB. SOCIAL S/ LUCRO LÍQUIDO                              36.381        12.483        34.841    191,44        4,42
+ ENTIDADES FINANCEIRAS                                                9.127         1.044        10.274    774,57      (11,16)
+ DEMAIS EMPRESAS                                                     27.253        11.440        24.567    138,24       10,93
+CIDE-COMBUSTÍVEIS                                                         281        313           259       (9,97)     8,48
+PSS - CONTRIB. DO PLANO DE SEGURIDADE DO SERVIDOR                     3.478         6.447         1.170     (46,06)   197,34
+OUTRAS RECEITAS ADMINISTRADAS                                         6.501         6.303         4.361      3,14      49,08
+                       SUBTOTAL [A]                                 249.741       191.710       227.426     30,27       9,81
+
+                RECEITA PREVIDENCIÁRIA [B]                           63.459        93.501        57.602     (32,13)    10,17
+
+           ADMINISTRADAS PELA RFB [C]=[A]+[B]                       313.201       285.210       285.028      9,81       9,88
+
+        ADMINISTRADAS POR OUTROS ÓRGÃOS [D]                          12.551         7.514        16.136     67,04      (22,22)
+
+                  TOTAL GERAL [E]=[C]+[D]                           325.751       292.724       301.164     11,28       8,16

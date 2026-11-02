@@ -262,3 +262,46 @@ model DespesaFuncao {
 
   @@unique([ano, bimestre, funcao, subfuncao])
 }
+
+// Arrecadação federal aberta por tributo (Tabela I do relatório mensal da Receita). Valores em R$.
+// `pai` é o código do tributo que contém este (ex.: "irpf" tem pai "ir"); o nível 0 soma o total.
+model ArrecadacaoFederalDetalhe {
+  id     Int     @id @default(autoincrement())
+  ano    Int
+  mes    Int
+  codigo String
+  nome   String
+  pai    String?
+  nivel  Int
+  valor  Decimal @db.Decimal(18, 2)
+
+  @@unique([ano, mes, codigo])
+}
+
+// Arrecadação federal por base de incidência (Tabela VII da Receita): ano fechado ou acumulado até `ateMes`.
+model ArrecadacaoFederalBase {
+  id        Int     @id @default(autoincrement())
+  ano       Int
+  ateMes    Int
+  categoria String
+  valor     Decimal @db.Decimal(18, 2)
+
+  @@unique([ano, categoria])
+}
+
+// Receita tributária dos estados, anual e BRUTA, com as deduções (DCA Anexo I-C, Tesouro).
+// Só a árvore de impostos (1.1.1) e taxas (1.1.2). líquido = bruto - as três deduções.
+model ReceitaEstadualAnual {
+  id                    Int     @id @default(autoincrement())
+  ano                   Int
+  uf                    String
+  codConta              String
+  conta                 String
+  nivel                 Int
+  bruto                 Decimal @db.Decimal(18, 2)
+  deducaoFundeb         Decimal @default(0) @db.Decimal(18, 2)
+  deducaoTransferencias Decimal @default(0) @db.Decimal(18, 2)
+  outrasDeducoes        Decimal @default(0) @db.Decimal(18, 2)
+
+  @@unique([ano, uf, codConta])
+}

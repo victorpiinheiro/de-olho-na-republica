@@ -45,3 +45,21 @@ export const despesasSchema = z.object({
   items: z.array(linhaDespesaSchema),
   hasMore: z.boolean(),
 });
+
+// Linha da DCA Anexo I-C (GET /dca): receita orçamentária anual de um estado. Cada conta aparece uma vez por
+// coluna: "Receitas Brutas Realizadas" e, quando há, as três deduções.
+export const linhaDcaSchema = z.object({
+  exercicio: z.number().int(),
+  cod_ibge: z.number().int(),
+  uf: z.string(),
+  coluna: z.string(),
+  cod_conta: z.string(),
+  conta: z.string(),
+  valor: z.number().nullable(),
+});
+export type LinhaDca = z.infer<typeof linhaDcaSchema>;
+
+export const dcaSchema = z.object({
+  items: z.array(linhaDcaSchema),
+  hasMore: z.boolean(),
+});

@@ -1,0 +1,383 @@
+{
+ "hasMore": false,
+ "items": [
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Receitas Brutas Realizadas",
+   "cod_conta": "RO1.1.0.0.00.0.0",
+   "conta": "1.1.0.0.00.0.0 - Impostos, Taxas e Contribuições de Melhoria",
+   "valor": 116530782707.02
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Deduções - Transferências Constitucionais",
+   "cod_conta": "RO1.1.0.0.00.0.0",
+   "conta": "1.1.0.0.00.0.0 - Impostos, Taxas e Contribuições de Melhoria",
+   "valor": 28130602895.66
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Deduções - FUNDEB",
+   "cod_conta": "RO1.1.0.0.00.0.0",
+   "conta": "1.1.0.0.00.0.0 - Impostos, Taxas e Contribuições de Melhoria",
+   "valor": 14960652355.37
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Outras Deduções da Receita",
+   "cod_conta": "RO1.1.0.0.00.0.0",
+   "conta": "1.1.0.0.00.0.0 - Impostos, Taxas e Contribuições de Melhoria",
+   "valor": 10568471.93
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Receitas Brutas Realizadas",
+   "cod_conta": "RO1.1.1.0.00.0.0",
+   "conta": "1.1.1.0.00.0.0 - Impostos",
+   "valor": 111262839466.88
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Deduções - Transferências Constitucionais",
+   "cod_conta": "RO1.1.1.0.00.0.0",
+   "conta": "1.1.1.0.00.0.0 - Impostos",
+   "valor": 28130602895.66
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Deduções - FUNDEB",
+   "cod_conta": "RO1.1.1.0.00.0.0",
+   "conta": "1.1.1.0.00.0.0 - Impostos",
+   "valor": 14960652355.37
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Outras Deduções da Receita",
+   "cod_conta": "RO1.1.1.0.00.0.0",
+   "conta": "1.1.1.0.00.0.0 - Impostos",
+   "valor": 10568471.93
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Receitas Brutas Realizadas",
+   "cod_conta": "RO1.1.1.2.00.0.0",
+   "conta": "1.1.1.2.00.0.0 - Impostos sobre o Patrimônio",
+   "valor": 15211220156.18
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Deduções - Transferências Constitucionais",
+   "cod_conta": "RO1.1.1.2.00.0.0",
+   "conta": "1.1.1.2.00.0.0 - Impostos sobre o Patrimônio",
+   "valor": 6476151606.77
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Deduções - FUNDEB",
+   "cod_conta": "RO1.1.1.2.00.0.0",
+   "conta": "1.1.1.2.00.0.0 - Impostos sobre o Patrimônio",
+   "valor": 1747013709.88
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Receitas Brutas Realizadas",
+   "cod_conta": "RO1.1.1.2.51.0.0",
+   "conta": "1.1.1.2.51.0.0 - Imposto sobre a Propriedade de Veículos Automotores",
+   "valor": 12952303213.53
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Deduções - Transferências Constitucionais",
+   "cod_conta": "RO1.1.1.2.51.0.0",
+   "conta": "1.1.1.2.51.0.0 - Imposto sobre a Propriedade de Veículos Automotores",
+   "valor": 6476151606.77
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Deduções - FUNDEB",
+   "cod_conta": "RO1.1.1.2.51.0.0",
+   "conta": "1.1.1.2.51.0.0 - Imposto sobre a Propriedade de Veículos Automotores",
+   "valor": 1295230321.35
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Receitas Brutas Realizadas",
+   "cod_conta": "RO1.1.1.2.52.0.0",
+   "conta": "1.1.1.2.52.0.0 - Imposto sobre Transmissão ¿Causa Mortis¿ e Doação de Bens e Direitos",
+   "valor": 2258916942.65
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Deduções - FUNDEB",
+   "cod_conta": "RO1.1.1.2.52.0.0",
+   "conta": "1.1.1.2.52.0.0 - Imposto sobre Transmissão ¿Causa Mortis¿ e Doação de Bens e Direitos",
+   "valor": 451783388.53
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Receitas Brutas Realizadas",
+   "cod_conta": "RO1.1.1.3.00.0.0",
+   "conta": "1.1.1.3.00.0.0 - Impostos sobre a Renda e Proventos de Qualquer Natureza",
+   "valor": 8328974794.32
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Receitas Brutas Realizadas",
+   "cod_conta": "RO1.1.1.3.03.0.0",
+   "conta": "1.1.1.3.03.0.0 - Imposto sobre a Renda - Retido na Fonte",
+   "valor": 8328974794.32
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Receitas Brutas Realizadas",
+   "cod_conta": "RO1.1.1.3.03.1.0",
+   "conta": "1.1.1.3.03.1.0 - Imposto sobre a Renda - Retido na Fonte - Trabalho",
+   "valor": 7628321969.24
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Receitas Brutas Realizadas",
+   "cod_conta": "RO1.1.1.3.03.4.0",
+   "conta": "1.1.1.3.03.4.0 - Imposto sobre a Renda - Retido na Fonte - Outros Rendimentos",
+   "valor": 700652825.08
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Receitas Brutas Realizadas",
+   "cod_conta": "RO1.1.1.4.00.0.0",
+   "conta": "1.1.1.4.00.0.0 - Impostos sobre a Produção e Circulação de Mercadorias e Serviços",
+   "valor": 87722644516.38
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Deduções - Transferências Constitucionais",
+   "cod_conta": "RO1.1.1.4.00.0.0",
+   "conta": "1.1.1.4.00.0.0 - Impostos sobre a Produção e Circulação de Mercadorias e Serviços",
+   "valor": 21654451288.89
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Deduções - FUNDEB",
+   "cod_conta": "RO1.1.1.4.00.0.0",
+   "conta": "1.1.1.4.00.0.0 - Impostos sobre a Produção e Circulação de Mercadorias e Serviços",
+   "valor": 13213638645.49
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Outras Deduções da Receita",
+   "cod_conta": "RO1.1.1.4.00.0.0",
+   "conta": "1.1.1.4.00.0.0 - Impostos sobre a Produção e Circulação de Mercadorias e Serviços",
+   "valor": 10568471.93
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Receitas Brutas Realizadas",
+   "cod_conta": "RO1.1.1.4.50.0.0",
+   "conta": "1.1.1.4.50.0.0 - Impostos sobre a Produção e Circulação de Mercadorias e Serviços",
+   "valor": 87722644516.38
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Deduções - Transferências Constitucionais",
+   "cod_conta": "RO1.1.1.4.50.0.0",
+   "conta": "1.1.1.4.50.0.0 - Impostos sobre a Produção e Circulação de Mercadorias e Serviços",
+   "valor": 21654451288.89
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Deduções - FUNDEB",
+   "cod_conta": "RO1.1.1.4.50.0.0",
+   "conta": "1.1.1.4.50.0.0 - Impostos sobre a Produção e Circulação de Mercadorias e Serviços",
+   "valor": 13213638645.49
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Outras Deduções da Receita",
+   "cod_conta": "RO1.1.1.4.50.0.0",
+   "conta": "1.1.1.4.50.0.0 - Impostos sobre a Produção e Circulação de Mercadorias e Serviços",
+   "valor": 10568471.93
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Receitas Brutas Realizadas",
+   "cod_conta": "RO1.1.1.4.50.1.0",
+   "conta": "1.1.1.4.50.1.0 - Imposto sobre Operações Relativas à Circulação de Mercadorias e sobre Prestações de Serviços de Transporte Interestadual e Intermunicipal e de Comunicação",
+   "valor": 86617805155.56
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Deduções - Transferências Constitucionais",
+   "cod_conta": "RO1.1.1.4.50.1.0",
+   "conta": "1.1.1.4.50.1.0 - Imposto sobre Operações Relativas à Circulação de Mercadorias e sobre Prestações de Serviços de Transporte Interestadual e Intermunicipal e de Comunicação",
+   "valor": 21654451288.89
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Deduções - FUNDEB",
+   "cod_conta": "RO1.1.1.4.50.1.0",
+   "conta": "1.1.1.4.50.1.0 - Imposto sobre Operações Relativas à Circulação de Mercadorias e sobre Prestações de Serviços de Transporte Interestadual e Intermunicipal e de Comunicação",
+   "valor": 12992670773.33
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Outras Deduções da Receita",
+   "cod_conta": "RO1.1.1.4.50.1.0",
+   "conta": "1.1.1.4.50.1.0 - Imposto sobre Operações Relativas à Circulação de Mercadorias e sobre Prestações de Serviços de Transporte Interestadual e Intermunicipal e de Comunicação",
+   "valor": 10568471.93
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Receitas Brutas Realizadas",
+   "cod_conta": "RO1.1.1.4.50.2.0",
+   "conta": "1.1.1.4.50.2.0 - Adicional ICMS - Fundo Estadual de Combate à Pobreza",
+   "valor": 1104839360.82
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Deduções - FUNDEB",
+   "cod_conta": "RO1.1.1.4.50.2.0",
+   "conta": "1.1.1.4.50.2.0 - Adicional ICMS - Fundo Estadual de Combate à Pobreza",
+   "valor": 220967872.16
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Receitas Brutas Realizadas",
+   "cod_conta": "RO1.1.2.0.00.0.0",
+   "conta": "1.1.2.0.00.0.0 - Taxas",
+   "valor": 5267943240.14
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Receitas Brutas Realizadas",
+   "cod_conta": "RO1.1.2.1.00.0.0",
+   "conta": "1.1.2.1.00.0.0 - Taxas pelo Exercício do Poder de Polícia",
+   "valor": 4448802274.83
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Receitas Brutas Realizadas",
+   "cod_conta": "RO1.1.2.1.02.0.0",
+   "conta": "1.1.2.1.02.0.0 - Taxas de Fiscalização das Telecomunicações",
+   "valor": 4448802274.83
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Receitas Brutas Realizadas",
+   "cod_conta": "RO1.1.2.1.02.1.0",
+   "conta": "1.1.2.1.02.1.0 - Taxa de Fiscalização de Instalação - TFI - Não Proveniente da Utilização de Posições Orbitais",
+   "valor": 3483315323.83
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Receitas Brutas Realizadas",
+   "cod_conta": "RO1.1.2.1.02.4.0",
+   "conta": "1.1.2.1.02.4.0 - Taxa de Fiscalização de Funcionamento - TFF - Proveniente da Utilização de Posições Orbitais",
+   "valor": 965486951
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Receitas Brutas Realizadas",
+   "cod_conta": "RO1.1.2.2.00.0.0",
+   "conta": "1.1.2.2.00.0.0 - Taxas pela Prestação de Serviços",
+   "valor": 819140965.31
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Receitas Brutas Realizadas",
+   "cod_conta": "RO1.1.2.2.01.0.0",
+   "conta": "1.1.2.2.01.0.0 - Taxas pela Prestação de Serviços em Geral",
+   "valor": 179197001.46
+  },
+  {
+   "exercicio": 2025,
+   "cod_ibge": 31,
+   "uf": "MG",
+   "coluna": "Receitas Brutas Realizadas",
+   "cod_conta": "RO1.1.2.2.02.0.0",
+   "conta": "1.1.2.2.02.0.0 - Emolumentos e Custas Judiciais",
+   "valor": 639943963.85
+  }
+ ]
+}

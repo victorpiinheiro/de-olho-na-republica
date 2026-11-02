@@ -32,7 +32,10 @@ const numeros = (s: string) => s.trim().split(/\s+/);
 const soma = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
 
 // Seleciona a página pelo título exato ("TABELA III" não pode casar com "TABELA III-A").
-export function paginaDaTabela(textoCompleto: string, titulo: "TABELA III" | "TABELA III-A"): string {
+export function paginaDaTabela(
+  textoCompleto: string,
+  titulo: "TABELA I" | "TABELA III" | "TABELA III-A" | "TABELA VII",
+): string {
   const re = new RegExp(String.raw`^\s*${titulo}\s*$`, "m");
   const pagina = textoCompleto.split("\f").find((p) => re.test(p));
   if (!pagina) throw new Error(`${titulo} não encontrada no relatório da Receita`);

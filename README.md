@@ -12,7 +12,7 @@ Site de transparência política. Reúne, em um só lugar, o que o Congresso gas
 
 | Tela | O que mostra | Fonte oficial |
 |---|---|---|
-| **Impostômetro** | Arrecadação de tributos no ano: dados oficiais (por mês, bimestre ou acumulado, filtrável por esfera, UF e tributo) e uma projeção animada, rotulada como projeção | Federal: Receita Federal (relatório mensal de arrecadação, PDF). Estadual: Tesouro Nacional, API Siconfi (RREO, receitas por estado) |
+| **Impostômetro** | Arrecadação de tributos no ano: dados oficiais (por mês, bimestre ou acumulado, filtrável por esfera, UF e tributo), detalhe por tributo (Federal mensal; Estadual anual: ICMS, IPVA, ITCMD...), por base de incidência, e uma projeção animada, rotulada como projeção | Federal: Receita Federal (relatório mensal de arrecadação, PDF, Tabelas I, III e VII). Estadual: Tesouro Nacional, API Siconfi (RREO bimestral, líquido; DCA anual, bruta) |
 | **Parlamentares** | Deputados e senadores, ranking de gasto da cota parlamentar, presença, perfil com notas fiscais | Câmara: Dados Abertos da Câmara (API REST e CSV anual de despesas). Senado: Dados Abertos do Senado (API) e verbas indenizatórias (CEAPS) |
 | **Leis e votações** | Proposições que viraram lei, foram aprovadas ou rejeitadas, resumo, autoria, placar, tramitação e como cada parlamentar votou | Câmara e Senado (Dados Abertos), mesmas APIs acima |
 | **Eleições 2026** | Resultados do 1º e do 2º turno, comparação entre os dois, comparecimento, finalistas e virada por UF | TSE, resultados oficiais (`resultados.tse.jus.br`) |
@@ -24,7 +24,12 @@ Site de transparência política. Reúne, em um só lugar, o que o Congresso gas
 **Impostômetro**
 - *Dados oficiais*: o que a fonte publicou. A Receita Federal publica por mês. Os estados publicam por bimestre; para exibir por mês, cada bimestre é dividido em dois meses iguais (a soma é preservada), e por isso o recorte "mês" fica desativado para Estadual e Total.
 - *Projeção em tempo real*: o contador animado = base oficial acumulada + taxa por segundo. Os meses ainda não publicados são estimados a partir do mesmo mês do ano anterior, vezes o crescimento médio. É sempre exibido como **projeção**, nunca como dado oficial.
-- *Total* = Federal + Estadual, só no período em que os dois estão publicados.
+- *Total* = Federal + Estadual, só no período em que os dois estão publicados. **Atenção ao bruto × líquido:** o Federal é
+  bruto, mas o Estadual do RREO vem **líquido** dos repasses aos municípios e do FUNDEB (em 2025: R$ 805 bi no RREO contra
+  R$ 1.155 bi brutos na DCA). A tela rotula isso, e o bruto por imposto (ICMS, IPVA, ITCMD) aparece no bloco "Estadual por
+  imposto", que é anual (a DCA de um ano sai por volta de abril do seguinte).
+- *Detalhe por tributo:* o Federal vem aberto por tributo, mês a mês (Tabela I da Receita), e por base de incidência
+  (Tabela VII). Os parsers conferem que as partes somam o total e falham se o layout do PDF mudar.
 - **Municipal não entra.** O RREO municipal sai incompleto (em uma amostra de 40 municípios, cerca de 60% entregaram, cobrindo cerca de 90% da população). Um total parcial seria lido como o total do país. Só vale reavaliar com dado completo.
 
 **Parlamentares e perfil**
@@ -93,7 +98,9 @@ Cada um roda com `npm run sync:<nome>`.
 | `job:revalidar` | Chama `/api/revalidate` ao fim dos outros jobs | após cada workflow |
 | `sync:proposicoes-senado` | Situação e norma das proposições do Senado | diária |
 | `sync:arrecadacao` | Arrecadação federal (Receita) | mensal (dia 5) |
-| `sync:arrecadacao-estados` | Arrecadação estadual, 27 UFs (Siconfi); leva cerca de 8 min | mensal |
+| `sync:arrecadacao-estados` | Arrecadação estadual, 27 UFs (Siconfi, RREO); leva cerca de 8 min | mensal |
+| `sync:arrecadacao-detalhe` | Federal por tributo (Tabela I) e por base de incidência (Tabela VII) | mensal |
+| `sync:receita-estadual` | Receita estadual bruta por imposto, com deduções (DCA anual) | mensal |
 | `sync:orcamento` | Orçamento da União (Siconfi) | mensal (o RREO sai a cada bimestre) |
 | `sync:eleicoes` | Resultados do TSE | carga única, manual |
 | `sync:presidentes` | Presidentes (Wikidata) | carga única, manual |

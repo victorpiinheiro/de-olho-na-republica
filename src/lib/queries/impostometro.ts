@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import type { DetalheEstadualDados, DetalheFederalDados } from "@/lib/detalhe";
 import type { EsferaTela, SerieOficial } from "@/lib/oficial";
 import { montarSerie, variacaoReal, type LinhaArrecadacao, type MesTotal } from "@/lib/impostometro";
 
@@ -35,12 +36,69 @@ function montar(linhas: LinhaArrecadacao[], { ano, populacao, geradoEm }: Base, 
 export interface ImpostometroCompleto {
   projecao: ImpostometroPorEsfera;
   oficial: { ano: number; series: SerieOficial[]; populacao: number | null };
+  // Aberto por tributo: Federal mensal (Receita) e Estadual anual e bruto (DCA). null = ainda não carregado.
+  detalhe: { federal: DetalheFederalDados | null; estadual: DetalheEstadualDados | null };
+}
+
+// Federal por tributo (Tabela I) e por base de incidência (Tabela VII) + Estadual bruto anual (DCA), em formato
+// compacto: as contas vão uma vez e os valores como tuplas, para não pesar na página.
+async function carregarDetalhe(): Promise<ImpostometroCompleto["detalhe"]> {
+  const [fed, base, est] = await Promise.all([
+    db.arrecadacaoFederalDetalhe.findMany({ orderBy: [{ ano: "asc" }, { mes: "asc" }] }),
+    db.arrecadacaoFederalBase.findMany(),
+    db.receitaEstadualAnual.findMany({ orderBy: [{ ano: "desc" }, { uf: "asc" }, { codConta: "asc" }] }),
+  ]);
+
+  let federal: DetalheFederalDados | null = null;
+  if (fed.length > 0) {
+    const tributos: DetalheFederalDados["tributos"] = [];
+    const indice = new Map<string, number>();
+    for (const r of fed) {
+      if (indice.has(r.codigo)) continue;
+      indice.set(r.codigo, tributos.length);
+      tributos.push({ codigo: r.codigo, nome: r.nome, pai: r.pai, nivel: r.nivel });
+    }
+    const ano = Math.max(...fed.map((r) => r.ano));
+    federal = {
+      ano,
+      ultimoMes: Math.max(...fed.filter((r) => r.ano === ano).map((r) => r.mes)),
+      tributos,
+      valores: fed.map((r) => [r.ano, r.mes, indice.get(r.codigo)!, Number(r.valor)]),
+      base: base.map((b) => ({ ano: b.ano, ateMes: b.ateMes, categoria: b.categoria, valor: Number(b.valor) })),
+    };
+  }
+
+  let estadual: DetalheEstadualDados | null = null;
+  if (est.length > 0) {
+    const contas: DetalheEstadualDados["contas"] = [];
+    const indice = new Map<string, number>();
+    for (const r of est) {
+      if (indice.has(r.codConta)) continue;
+      indice.set(r.codConta, contas.length);
+      contas.push({ cod: r.codConta, nome: r.conta, nivel: r.nivel });
+    }
+    estadual = {
+      anos: [...new Set(est.map((r) => r.ano))].sort((a, b) => b - a),
+      contas,
+      valores: est.map((r) => [
+        r.ano,
+        r.uf,
+        indice.get(r.codConta)!,
+        Number(r.bruto),
+        Number(r.deducaoFundeb),
+        Number(r.deducaoTransferencias),
+        Number(r.outrasDeducoes),
+      ]),
+    };
+  }
+  return { federal, estadual };
 }
 
 export async function carregarImpostometro(): Promise<ImpostometroCompleto> {
   const vazio: ImpostometroCompleto = {
     projecao: { total: null, federal: null, estadual: null },
     oficial: { ano: new Date().getFullYear(), series: [], populacao: null },
+    detalhe: { federal: null, estadual: null },
   };
   const recente = await db.arrecadacao.findFirst({
     where: { esfera: "FEDERAL", estimado: false },
@@ -105,5 +163,6 @@ export async function carregarImpostometro(): Promise<ImpostometroCompleto> {
   return {
     projecao: { total: dadosTotal, federal: dadosFederal, estadual: dadosEstadual },
     oficial: { ano, series: [...mapa.values()], populacao: base.populacao },
+    detalhe: await carregarDetalhe(),
   };
 }

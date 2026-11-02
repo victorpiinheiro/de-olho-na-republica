@@ -20,6 +20,12 @@ const FONTE: Record<EsferaTela, string> = {
   estadual: "Tesouro Nacional (Siconfi)",
   total: "Receita Federal e Tesouro Nacional (Siconfi)",
 };
+// O Federal é bruto; o RREO dos estados vem líquido de repasses aos municípios e FUNDEB.
+const ESCOPO: Record<EsferaTela, string> = {
+  federal: "",
+  estadual: " · líquido de repasses",
+  total: " · federal bruto + estadual líquido",
+};
 
 // Último mês publicado de uma esfera (0 se nenhum).
 function ultimoMes(series: SerieOficial[], esfera: SerieOficial["esfera"], ano: number): number {
@@ -151,11 +157,20 @@ export function PainelOficial({
       </div>
 
       <div className="card oficial-destaque">
-        <div className="contador-rotulo">Arrecadado oficial · {titulo}</div>
+        <div className="contador-rotulo">Arrecadado oficial · {titulo}{ESCOPO[esfera]}</div>
         <div className="contador-valor oficial-valor">
           {r.valor === null ? "—" : <><span className="contador-moeda">R$</span> {brlGrande(r.valor).replace(/^R\$\s?/, "")}</>}
         </div>
       </div>
+
+      {esfera !== "federal" && (
+        <p className="nota-grafico nota-liquido">
+          <strong>Atenção:</strong> os valores estaduais deste bloco são <strong>líquidos</strong>: o RREO já desconta os repasses
+          constitucionais aos municípios e o FUNDEB, e cada estado contabiliza essas deduções de um jeito. O valor{" "}
+          <strong>bruto</strong>, por imposto (ICMS, IPVA e outros), está no bloco “Estadual por imposto”, mais abaixo
+          {esfera === "total" ? ". Por isso o Total soma um Federal bruto com um Estadual líquido" : ""}.
+        </p>
+      )}
 
       <div className="kpis kpis-3">
         {r.variacao !== null && r.anterior !== null && (
