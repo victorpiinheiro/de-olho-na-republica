@@ -1,9 +1,9 @@
 name: Diário (despesas, CEAPS e proposições)
 
-# Todo dia às 3h de Brasília (6h UTC).
+# Todo dia às 3h23 de Brasília (6h23 UTC). Minuto fora de 0 de propósito (ver votacoes.yml).
 on:
   schedule:
-    - cron: "0 6 * * *"
+    - cron: "23 6 * * *"
   workflow_dispatch:
 
 permissions:

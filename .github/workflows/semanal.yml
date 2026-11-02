@@ -1,9 +1,9 @@
 name: Semanal (parlamentares e tamanho do banco)
 
-# Domingo às 4h de Brasília (7h UTC).
+# Domingo às 4h41 de Brasília (7h41 UTC). Minuto fora de 0 de propósito (ver votacoes.yml).
 on:
   schedule:
-    - cron: "0 7 * * 0"
+    - cron: "41 7 * * 0"
   workflow_dispatch:
 
 permissions:

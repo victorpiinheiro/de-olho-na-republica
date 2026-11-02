@@ -14,17 +14,17 @@ GitHub Actions (cron) ──► jobs gravam no Supabase ──► POST /api/reva
 
 | Workflow | Quando (horário de Brasília) | O que roda |
 |---|---|---|
-| `votacoes.yml` | de hora em hora, 8h–20h, seg–sex | votações da Câmara e do Senado (últimos 2 dias) |
-| `diario.yml` | todo dia, 3h | despesas da Câmara, CEAPS, proposições da Câmara e do Senado |
-| `semanal.yml` | domingo, 4h | deputados, senadores, tamanho do banco |
-| `mensal.yml` | dia 5, 6h | arrecadação federal e estadual, orçamento, detalhe federal por tributo, receita estadual bruta por imposto (DCA) |
+| `votacoes.yml` | de hora em hora (minuto 37), 8h–20h, seg–sex | votações da Câmara e do Senado (últimos 2 dias) |
+| `diario.yml` | todo dia, 3h23 | despesas da Câmara, CEAPS, proposições da Câmara e do Senado |
+| `semanal.yml` | domingo, 4h41 | deputados, senadores, tamanho do banco |
+| `mensal.yml` | dia 5, 6h17 | arrecadação federal e estadual, orçamento, detalhe federal por tributo, receita estadual bruta por imposto (DCA) |
 | `carga-unica.yml` | só manual | `sync-eleicoes` ou `sync-presidentes` (escolhido na hora) |
 
 - O Mensal instala o `poppler-utils` (`pdftotext`) no início, porque lê os PDFs da Receita; o computador do GitHub não o traz.
 - Todos têm `workflow_dispatch`: Actions → escolher o workflow → **Run workflow**.
 - Cada workflow roda os jobs em sequência. Um job que falha não impede os seguintes, mas a atualização das páginas só acontece se **tudo** deu certo.
 - `concurrency` impede dois jobs do mesmo workflow ao mesmo tempo.
-- Os horários do cron são em UTC (Brasília = UTC−3).
+- Os horários do cron são em UTC (Brasília = UTC−3). Nenhum está no minuto 0: o GitHub atrasa ou perde os agendamentos do início da hora.
 - O GitHub **desativa workflows agendados** em repositório sem atividade por 60 dias. Se isso acontecer, reative em Actions.
 
 ## Segredos e variáveis

@@ -1,9 +1,10 @@
 name: Votações (Câmara e Senado)
 
-# De hora em hora, das 8h às 20h de Brasília (11h–23h UTC), de segunda a sexta.
+# De hora em hora (no minuto 37), das 8h às 20h de Brasília (11h–23h UTC), de segunda a sexta.
+# Evita o minuto 0: o GitHub atrasa ou perde os agendamentos do início da hora.
 on:
   schedule:
-    - cron: "0 11-23 * * 1-5"
+    - cron: "37 11-23 * * 1-5"
   workflow_dispatch:
 
 permissions:

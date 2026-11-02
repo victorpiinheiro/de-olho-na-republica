@@ -4,7 +4,7 @@ name: Mensal (arrecadação, detalhe por tributo e orçamento)
 # os jobs só confirmam que não há dado novo.
 on:
   schedule:
-    - cron: "0 9 5 * *"
+    - cron: "17 9 5 * *"
   workflow_dispatch:
 
 permissions:
