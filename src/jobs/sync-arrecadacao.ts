@@ -1,6 +1,8 @@
 import { db } from "@/lib/db";
 import { projetarMeses } from "@/lib/impostometro";
+import { falhaDeRede } from "@/lib/http";
 import { runJob } from "@/lib/job";
+import { log } from "@/lib/log";
 import { buscarPopulacaoBrasil } from "@/lib/sources/ibge/client";
 import { lerTabelaMensal, paginaDaTabela, toArrecadacoes } from "@/lib/sources/receita/adapter";
 import { baixarUltimaAnalise } from "@/lib/sources/receita/client";
@@ -46,18 +48,34 @@ runJob("sync-arrecadacao", async () => {
   ];
   await db.$transaction(operacoes);
 
-  const populacao = await buscarPopulacaoBrasil();
-  await db.indicador.upsert({
-    where: { chave_referencia: { chave: "populacao", referencia: String(populacao.ano) } },
-    create: { chave: "populacao", referencia: String(populacao.ano), valor: populacao.pessoas },
-    update: { valor: populacao.pessoas },
-  });
+  // A população é uma estimativa ANUAL do IBGE. O computador do GitHub fica nos EUA e o servidor do IBGE às vezes não
+  // responde de lá: nesse caso (e só em falha de rede) mantém a última população guardada e avisa, em vez de derrubar a
+  // arrecadação do mês. Resposta com formato errado continua derrubando o job.
+  let populacao: { ano: number; pessoas: number } | null = null;
+  try {
+    populacao = await buscarPopulacaoBrasil();
+  } catch (e) {
+    if (!falhaDeRede(e)) throw e;
+    const ultima = await db.indicador.findFirst({ where: { chave: "populacao" }, orderBy: { referencia: "desc" } });
+    if (!ultima) throw e; // sem nenhuma população guardada não há o que manter
+    log("warn", "IBGE inalcançável: mantida a última população guardada", {
+      referencia: ultima.referencia,
+      erro: e instanceof Error ? e.message : String(e),
+    });
+  }
+  if (populacao) {
+    await db.indicador.upsert({
+      where: { chave_referencia: { chave: "populacao", referencia: String(populacao.ano) } },
+      create: { chave: "populacao", referencia: String(populacao.ano), valor: populacao.pessoas },
+      update: { valor: populacao.pessoas },
+    });
+  }
 
   return {
     relatorio: `${analise.mes}/${ano}`,
     mesesOficiais: atual.meses.length,
     linhasOficiais: oficiais.length,
     linhasProjetadas: projecao.length,
-    populacao: populacao.pessoas,
+    populacao: populacao?.pessoas ?? "mantida a anterior (IBGE inalcançável)",
   };
 });

@@ -21,6 +21,14 @@ const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms));
 // 5xx e 429 são transitórios; 4xx não adianta repetir.
 const transitorio = (status: number) => status === 429 || status >= 500;
 
+// Falha de comunicação (servidor inalcançável, tempo esgotado, 5xx ou 429), e não de conteúdo: quem chama pode decidir
+// seguir com o dado que já tem. Resposta com formato errado (Zod) NÃO é falha de rede e deve continuar derrubando o job.
+export function falhaDeRede(e: unknown): boolean {
+  if (e instanceof HttpError) return transitorio(e.status);
+  if (e instanceof TypeError && e.message === "fetch failed") return true;
+  return e instanceof Error && (e.name === "TimeoutError" || e.name === "AbortError");
+}
+
 export async function fetchWithRetry(
   url: string,
   init: RequestInit = {},

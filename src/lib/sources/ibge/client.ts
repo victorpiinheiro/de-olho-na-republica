@@ -23,6 +23,7 @@ export function toPopulacao(bruto: unknown): { ano: number; pessoas: number } {
 }
 
 export async function buscarPopulacaoBrasil() {
-  const res = await fetchWithRetry(URL);
+  // Poucas tentativas: o job mensal segue com a última população guardada se o IBGE não responder (ver sync-arrecadacao).
+  const res = await fetchWithRetry(URL, {}, { retries: 2 });
   return toPopulacao(await res.json());
 }
