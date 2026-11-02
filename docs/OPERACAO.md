@@ -20,6 +20,7 @@ GitHub Actions (cron) ──► jobs gravam no Supabase ──► POST /api/reva
 | `mensal.yml` | dia 5, 6h | arrecadação federal e estadual, orçamento, detalhe federal por tributo, receita estadual bruta por imposto (DCA) |
 | `carga-unica.yml` | só manual | `sync-eleicoes` ou `sync-presidentes` (escolhido na hora) |
 
+- O Mensal instala o `poppler-utils` (`pdftotext`) no início, porque lê os PDFs da Receita; o computador do GitHub não o traz.
 - Todos têm `workflow_dispatch`: Actions → escolher o workflow → **Run workflow**.
 - Cada workflow roda os jobs em sequência. Um job que falha não impede os seguintes, mas a atualização das páginas só acontece se **tudo** deu certo.
 - `concurrency` impede dois jobs do mesmo workflow ao mesmo tempo.
