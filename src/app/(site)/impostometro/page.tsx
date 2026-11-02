@@ -32,8 +32,8 @@ export default async function Page() {
     <>
       <h1>Impostômetro</h1>
       <p className="lead">
-        Arrecadação oficial dos tributos federais e estaduais em {dados?.ano ?? "2026"}, com recortes por mês e
-        bimestre, e uma projeção em tempo real, separada e identificada. Fontes: Receita Federal e Tesouro Nacional.
+        Quanto o Brasil arrecada em impostos, taxas e contribuições em {dados?.ano ?? "2026"}. O contador é uma
+        projeção; abaixo estão os números oficiais publicados pela Receita Federal e pelo Tesouro Nacional.
       </p>
       {dados ? (
         <PainelImpostometro completo={completo} />
@@ -41,8 +41,9 @@ export default async function Page() {
         <div className="card">Ainda não há dados de arrecadação carregados.</div>
       )}
 
-      <section className="card metodologia" aria-labelledby="titulo-metodologia">
-        <h2 id="titulo-metodologia">Como o valor é calculado</h2>
+      <details className="secao-fechavel metodologia">
+        <summary>Como o valor é calculado e de onde vêm os dados</summary>
+        <div className="secao-corpo">
         <ol>
           {PASSOS.map((p) => (
             <li key={p.n}>
@@ -64,7 +65,8 @@ export default async function Page() {
           confundido com o total do país. A variação real (IPCA) existe só para a esfera federal, calculada pela própria Receita.
           População: estimativa do IBGE.
         </p>
-      </section>
+        </div>
+      </details>
     </>
   );
 }

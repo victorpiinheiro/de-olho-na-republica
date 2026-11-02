@@ -67,3 +67,15 @@ export const IconeOrcamento = () => (
     <path d="M12 3v9h9" />
   </Icone>
 );
+
+export const IconeMenu = () => (
+  <Icone>
+    <path d="M4 7h16M4 12h16M4 17h16" />
+  </Icone>
+);
+
+export const IconeFechar = () => (
+  <Icone>
+    <path d="M6 6l12 12M18 6L6 18" />
+  </Icone>
+);

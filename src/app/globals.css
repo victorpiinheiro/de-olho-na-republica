@@ -153,19 +153,116 @@ a {
   margin: 0 0 24px;
 }
 
+/* Menu: barra do topo, botões e fundo só existem no celular; no desktop o menu fica fixo à esquerda. */
+.topo-mobile,
+.menu-fundo {
+  display: none;
+}
+
 @media (max-width: 800px) {
   .shell {
     flex-direction: column;
   }
-  .sidebar {
-    position: static;
-    width: 100%;
-    border-right: 0;
+
+  /* A barra do topo fica acima do fundo escuro (e abaixo da gaveta): o botão continua tocável e vira "X". */
+  .topo-mobile {
+    position: sticky;
+    top: 0;
+    z-index: 45;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 56px;
+    padding: 6px 8px 6px 16px;
+    background: var(--surface);
     border-bottom: 1px solid var(--border);
   }
+
+  .topo-mobile .brand {
+    padding: 0;
+    min-width: 0;
+  }
+
+  /* Menu aberto: a barra fica transparente e sem a marca (a gaveta já mostra a sua); só sobra o botão. */
+  .topo-mobile-aberto {
+    background: transparent;
+    border-bottom-color: transparent;
+  }
+
+  .topo-mobile-aberto .brand {
+    visibility: hidden;
+  }
+
+  .topo-mobile .brand strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .menu-botao {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  .menu-botao:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .menu-fundo {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: rgba(21, 23, 28, 0.45);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Gaveta: fechada fica fora da tela e invisível (sem foco do teclado nem leitor de tela). */
+  .sidebar {
+    z-index: 50;
+    width: min(320px, calc(100vw - 68px)); /* deixa 68 px livres à direita para o botão */
+    overflow-y: auto;
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 0.2s ease, visibility 0s linear 0.2s;
+  }
+
+  .sidebar-aberta {
+    transform: none;
+    visibility: visible;
+    transition: transform 0.2s ease;
+  }
+
+  body.menu-aberto {
+    overflow: hidden;
+  }
+
   .main {
     margin-left: 0;
     padding: 20px 16px;
+  }
+}
+
+@media (max-width: 800px) and (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .sidebar-aberta {
+    transition: none;
   }
 }
 
@@ -1834,6 +1931,50 @@ h2 {
   border-radius: 8px;
   background: var(--surface);
 }
+
+/* Seções recolhidas do Impostômetro (detalhe, filtro de estados, metodologia). */
+.secao-fechavel {
+  margin: 16px 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.secao-fechavel > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 10px 16px;
+  cursor: pointer;
+  list-style: none;
+  font-weight: 600;
+}
+.secao-fechavel > summary::-webkit-details-marker { display: none; }
+.secao-fechavel > summary::before { content: "▸"; width: 14px; color: var(--text-2); }
+.secao-fechavel[open] > summary::before { content: "▾"; }
+.secao-fechavel > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.secao-fechavel > summary small { margin-left: auto; color: var(--text-2); font-size: 13px; font-weight: 400; text-align: right; }
+.secao-corpo { padding: 0 16px 16px; }
+.secao-compacta { margin: 12px 0; }
+.det-pilha-solta { margin-top: 0; }
+
+/* Contador em destaque (primeira coisa da página) */
+.contador-hero { margin-bottom: 16px; }
+.contador-hero .projecao-topo { margin-bottom: 10px; }
+.contador-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  margin-top: 16px;
+  color: var(--text-2);
+  font-size: 14px;
+}
+.contador-stats strong { color: var(--text); font-size: 18px; font-variant-numeric: tabular-nums; }
+.contador-hero .contador-ano { margin-top: 16px; max-width: 420px; }
+.como-calcula { margin-top: 8px; color: var(--text-2); font-size: 14px; }
+.como-calcula summary { display: flex; align-items: center; min-height: 44px; cursor: pointer; color: var(--accent); font-weight: 600; }
+.como-calcula summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.como-calcula p { margin: 4px 0 0; max-width: 70ch; }
 
 /* Detalhe por tributo: reaproveita as listas "orc-*"; a linha sem filhos não tem seta nem é clicável. */
 .orc-funcao.det-folha {

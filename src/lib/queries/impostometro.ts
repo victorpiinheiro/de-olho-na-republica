@@ -42,13 +42,59 @@ export interface ImpostometroCompleto {
 
 // Federal por tributo (Tabela I) e por base de incidência (Tabela VII) + Estadual bruto anual (DCA), em formato
 // compacto: as contas vão uma vez e os valores como tuplas, para não pesar na página.
-async function carregarDetalhe(): Promise<ImpostometroCompleto["detalhe"]> {
-  const [fed, base, est] = await Promise.all([
-    db.arrecadacaoFederalDetalhe.findMany({ orderBy: [{ ano: "asc" }, { mes: "asc" }] }),
-    db.arrecadacaoFederalBase.findMany(),
-    db.receitaEstadualAnual.findMany({ orderBy: [{ ano: "desc" }, { uf: "asc" }, { codConta: "asc" }] }),
-  ]);
+interface LinhaFed { ano: number; mes: number; codigo: string; nome: string; pai: string | null; nivel: number; valor: number }
+interface LinhaBase { ano: number; ateMes: number; categoria: string; valor: number }
+interface LinhaEst {
+  ano: number; uf: string; codConta: string; conta: string; nivel: number;
+  bruto: number; deducaoFundeb: number; deducaoTransferencias: number; outrasDeducoes: number;
+}
+interface LinhaArr {
+  esfera: "FEDERAL" | "ESTADUAL"; uf: string; tributo: string; ano: number; mes: number;
+  valor: number; estimado: boolean; valorReal: number | null;
+}
 
+// Tudo o que a página precisa, numa única ida ao banco (cada uma custa ~1 s de distância em desenvolvimento).
+// O ano é o do último mês federal oficial; a arrecadação traz esse ano e o anterior.
+interface Tudo {
+  ano: number | null;
+  populacao: number | null;
+  arrecadacao: LinhaArr[];
+  detalheFederal: LinhaFed[];
+  base: LinhaBase[];
+  estadual: LinhaEst[];
+}
+
+async function lerTudo(): Promise<Tudo> {
+  const [r] = await db.$queryRaw<{ dados: Tudo }[]>`
+    WITH recente AS (SELECT max(ano) AS ano FROM "Arrecadacao" WHERE esfera = 'FEDERAL' AND NOT estimado)
+    SELECT jsonb_build_object(
+      'ano', (SELECT ano FROM recente),
+      'populacao', (SELECT valor FROM "Indicador" WHERE chave = 'populacao' ORDER BY referencia DESC LIMIT 1),
+      'arrecadacao', (
+        SELECT coalesce(jsonb_agg(jsonb_build_object(
+                 'esfera', a.esfera::text, 'uf', a.uf, 'tributo', a.tributo, 'ano', a.ano, 'mes', a.mes,
+                 'valor', a.valor, 'estimado', a.estimado, 'valorReal', a."valorReal")), '[]'::jsonb)
+        FROM "Arrecadacao" a, recente
+        WHERE a.esfera IN ('FEDERAL', 'ESTADUAL') AND a.ano IN (recente.ano - 1, recente.ano)),
+      'detalheFederal', (
+        SELECT coalesce(jsonb_agg(jsonb_build_object(
+                 'ano', d.ano, 'mes', d.mes, 'codigo', d.codigo, 'nome', d.nome, 'pai', d.pai, 'nivel', d.nivel, 'valor', d.valor)
+               ORDER BY d.ano, d.mes, d.id), '[]'::jsonb)
+        FROM "ArrecadacaoFederalDetalhe" d),
+      'base', (
+        SELECT coalesce(jsonb_agg(jsonb_build_object('ano', b.ano, 'ateMes', b."ateMes", 'categoria', b.categoria, 'valor', b.valor)), '[]'::jsonb)
+        FROM "ArrecadacaoFederalBase" b),
+      'estadual', (
+        SELECT coalesce(jsonb_agg(jsonb_build_object(
+                 'ano', e.ano, 'uf', e.uf, 'codConta', e."codConta", 'conta', e.conta, 'nivel', e.nivel, 'bruto', e.bruto,
+                 'deducaoFundeb', e."deducaoFundeb", 'deducaoTransferencias', e."deducaoTransferencias", 'outrasDeducoes', e."outrasDeducoes")
+               ORDER BY e.ano DESC, e.uf, e."codConta"), '[]'::jsonb)
+        FROM "ReceitaEstadualAnual" e)
+    ) AS dados`;
+  return r.dados;
+}
+
+function montarDetalhe(fed: LinhaFed[], base: LinhaBase[], est: LinhaEst[]): ImpostometroCompleto["detalhe"] {
   let federal: DetalheFederalDados | null = null;
   if (fed.length > 0) {
     const tributos: DetalheFederalDados["tributos"] = [];
@@ -100,17 +146,10 @@ export async function carregarImpostometro(): Promise<ImpostometroCompleto> {
     oficial: { ano: new Date().getFullYear(), series: [], populacao: null },
     detalhe: { federal: null, estadual: null },
   };
-  const recente = await db.arrecadacao.findFirst({
-    where: { esfera: "FEDERAL", estimado: false },
-    orderBy: [{ ano: "desc" }, { mes: "desc" }],
-    select: { ano: true },
-  });
-  if (!recente) return vazio;
-  const ano = recente.ano;
-
-  const rows = await db.arrecadacao.findMany({
-    where: { esfera: { in: ["FEDERAL", "ESTADUAL"] }, ano: { in: [ano - 1, ano] } },
-  });
+  const tudo = await lerTudo();
+  if (tudo.ano === null) return vazio;
+  const ano = tudo.ano;
+  const rows = tudo.arrecadacao;
   const linhasDe = (esfera: "FEDERAL" | "ESTADUAL"): (LinhaArrecadacao & { uf: string })[] =>
     rows
       .filter((r) => r.esfera === esfera)
@@ -124,8 +163,7 @@ export async function carregarImpostometro(): Promise<ImpostometroCompleto> {
         valorReal: r.valorReal === null ? null : Number(r.valorReal),
       }));
 
-  const populacao = await db.indicador.findFirst({ where: { chave: "populacao" }, orderBy: { referencia: "desc" } });
-  const base: Base = { ano, populacao: populacao ? Number(populacao.valor) : null, geradoEm: Date.now() };
+  const base: Base = { ano, populacao: tudo.populacao === null ? null : Number(tudo.populacao), geradoEm: Date.now() };
 
   const federal = linhasDe("FEDERAL");
   const estadual = linhasDe("ESTADUAL");
@@ -163,6 +201,6 @@ export async function carregarImpostometro(): Promise<ImpostometroCompleto> {
   return {
     projecao: { total: dadosTotal, federal: dadosFederal, estadual: dadosEstadual },
     oficial: { ano, series: [...mapa.values()], populacao: base.populacao },
-    detalhe: await carregarDetalhe(),
+    detalhe: montarDetalhe(tudo.detalheFederal, tudo.base, tudo.estadual),
   };
 }

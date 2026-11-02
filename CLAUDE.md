@@ -196,15 +196,19 @@ Regras:
 - Votos: Sim `#2459A6` (azul) · Não `#C05A1F` (laranja) · Abstenção `#B4B8BF`
   (azul × laranja de propósito, para ser acessível a daltônicos)
 - Cards com borda de 1px e raio de 12px; sem sombras pesadas, sem gradientes
-- Sidebar fixa de 248px; no mobile empilha acima do conteúdo
+- Sidebar fixa de 248px; no celular (até 800px) vira barra no topo com botão de hambúrguer e o menu abre como gaveta
+  lateral (fecha ao navegar, com Esc, no fundo escurecido e no X; o foco fica preso na gaveta enquanto aberta)
 - Alvos de toque ≥ 44px; contraste de texto ≥ 4.5:1
 
 ## Telas
-1. **Impostômetro**: contador grande animado, filtro por esfera (Total/Federal/Estadual) e por UF,
-   bloco "Dados oficiais" (recorte por mês/bimestre/acumulado, filtro de tributo, KPIs, barras, por tributo, sem projeção),
-   blocos de detalhe ("Federal por tributo" mensal e bruto, "Estadual por imposto" anual e bruto, e por base de
-   incidência, árvores expansíveis) e bloco "Projeção em tempo real" (contador animado, rotulado como projeção),
-   bloco de metodologia com o aviso de bruto × líquido
+1. **Impostômetro** (decisão: a projeção é a primeira coisa que o visitante vê; o resto é resumo ou fica recolhido):
+   esfera (Total/Federal/Estadual) no topo; "Filtrar por estado" recolhido (só na aba Estadual, com o resumo
+   "N de 27 estados" visível); **contador de projeção em destaque** (rotulado "Projeção", taxa por
+   segundo, hoje, mês corrente, ano decorrido; "Como é calculado" recolhido); **"Dado oficial"** resumido (recorte
+   mês/bimestre/acumulado, abrindo em "Acumulado no ano"; total, variação nominal sobre o ano anterior, por habitante,
+   gráfico por período e os 5 maiores tributos); seções recolhidas: "Detalhe por tributo e por imposto" (Federal
+   mensal e bruto, Estadual anual e bruto, por base de incidência) e "Como o valor é calculado e de onde vêm os dados"
+   (metodologia, com o aviso de bruto × líquido). Sem filtro de tributo na tela de entrada (a árvore do detalhe o substitui)
 2. **Parlamentares**: alternância Câmara/Senado, busca + filtros (UF, partido, ordenação), KPIs,
    tabela ranqueada por gasto com mini-barra, paginação
 3. **Perfil do parlamentar**: cabeçalho, KPIs (cota usada × limite, notas, presença, proposições),

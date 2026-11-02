@@ -39,7 +39,7 @@ export function PainelImpostometro({ completo }: { completo: ImpostometroComplet
     setUfsOff(novo);
   };
   const escopo = !filtrando
-    ? ROTULO_ESFERA[esfera]
+    ? `Brasil, ${ROTULO_ESFERA[esfera]}`
     : ufsOff.size <= 5
       ? `tributos estaduais líquidos de repasses, sem ${[...ufsOff].sort().join(", ")}`
       : `tributos líquidos de repasses de ${selecionadas.length} estado${selecionadas.length > 1 ? "s" : ""}`;
@@ -63,27 +63,37 @@ export function PainelImpostometro({ completo }: { completo: ImpostometroComplet
       </div>
 
       {ufs.length > 0 && (
-        <div className="filtro-ufs" role="group" aria-label="Estados incluídos">
-          <div className="filtro-ufs-topo">
-            <span>Estados incluídos · {selecionadas.length} de {ufs.length}</span>
-            <button type="button" className="link-botao" onClick={() => setUfsOff(new Set())} disabled={!filtrando}>Todos</button>
+        <details className="secao-fechavel secao-compacta">
+          <summary>
+            Filtrar por estado
+            <small>{filtrando ? `${selecionadas.length} de ${ufs.length} estados` : "todos os estados"}</small>
+          </summary>
+          <div className="secao-corpo">
+            <div className="filtro-ufs" role="group" aria-label="Estados incluídos">
+              <div className="filtro-ufs-topo">
+                <span>Estados incluídos · {selecionadas.length} de {ufs.length}</span>
+                <button type="button" className="link-botao" onClick={() => setUfsOff(new Set())} disabled={!filtrando}>Todos</button>
+              </div>
+              <div className="filtro-ufs-lista">
+                {ufs.map((uf) => (
+                  <button
+                    key={uf}
+                    type="button"
+                    className={`aba${ufsOff.has(uf) ? "" : " aba-ativa"}`}
+                    aria-pressed={!ufsOff.has(uf)}
+                    title={nomeUf(uf)}
+                    onClick={() => alternarUf(uf)}
+                  >
+                    {uf}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
-          <div className="filtro-ufs-lista">
-            {ufs.map((uf) => (
-              <button
-                key={uf}
-                type="button"
-                className={`aba${ufsOff.has(uf) ? "" : " aba-ativa"}`}
-                aria-pressed={!ufsOff.has(uf)}
-                title={nomeUf(uf)}
-                onClick={() => alternarUf(uf)}
-              >
-                {uf}
-              </button>
-            ))}
-          </div>
-        </div>
+        </details>
       )}
+
+      <PainelProjecao dados={dadosProjecao} escopo={escopo} />
 
       <PainelOficial
         series={oficial.series}
@@ -92,11 +102,21 @@ export function PainelImpostometro({ completo }: { completo: ImpostometroComplet
         esfera={esfera}
         ufs={filtrando ? new Set(selecionadas) : null}
       />
-      {esfera !== "estadual" && completo.detalhe.federal && <DetalheFederal d={completo.detalhe.federal} />}
-      {esfera !== "federal" && completo.detalhe.estadual && (
-        <DetalheEstadual d={completo.detalhe.estadual} ufs={filtrando ? new Set(selecionadas) : null} />
-      )}
-      <PainelProjecao dados={dadosProjecao} escopo={escopo} />
+
+      <details className="secao-fechavel">
+        <summary>
+          Detalhe por tributo e por imposto
+          <small>{esfera === "estadual" ? "ICMS, IPVA, ITCMD…" : esfera === "federal" ? "IR, COFINS, IPI…" : "IR, COFINS, ICMS, IPVA…"}</small>
+        </summary>
+        <div className="secao-corpo">
+          <div className="det-pilha det-pilha-solta">
+            {esfera !== "estadual" && completo.detalhe.federal && <DetalheFederal d={completo.detalhe.federal} />}
+            {esfera !== "federal" && completo.detalhe.estadual && (
+              <DetalheEstadual d={completo.detalhe.estadual} ufs={filtrando ? new Set(selecionadas) : null} />
+            )}
+          </div>
+        </div>
+      </details>
     </>
   );
 }

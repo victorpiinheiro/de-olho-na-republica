@@ -7,7 +7,6 @@ import { brlGrande, brlInteiro, MESES, MESES_COMPLETOS, pct, pctFatia } from "@/
 import {
   calcular,
   granularidadesPermitidas,
-  tributosDisponiveis,
   type EsferaTela,
   type Granularidade,
   type Selecao,
@@ -52,26 +51,12 @@ export function PainelOficial({
   esfera: EsferaTela;
   ufs: ReadonlySet<string> | null; // UFs incluídas na aba Estadual (null = todas)
 }) {
-  const [gran, setGran] = useState<Granularidade>("mes");
+  const [gran, setGran] = useState<Granularidade>("acumulado");
   const [periodo, setPeriodo] = useState<number | null>(null);
-  const [tributosOff, setTributosOff] = useState<ReadonlySet<string>>(new Set());
 
-  const disponiveis = tributosDisponiveis(series, esfera);
-  const off = new Set([...tributosOff].filter((t) => disponiveis.includes(t)));
-  const sel: Selecao = {
-    esfera,
-    ufs: esfera === "estadual" ? ufs : null,
-    tributos: off.size > 0 ? new Set(disponiveis.filter((t) => !off.has(t))) : null,
-  };
+  const sel: Selecao = { esfera, ufs: esfera === "estadual" ? ufs : null, tributos: null };
   const permitidas = granularidadesPermitidas(series, sel);
   const r = calcular(series, sel, ano, gran, periodo);
-
-  const alternarTributo = (t: string) => {
-    const novo = new Set(off);
-    if (novo.has(t)) novo.delete(t);
-    else if (disponiveis.length - novo.size > 1) novo.add(t); // sempre sobra ao menos um tributo
-    setTributosOff(novo);
-  };
 
   const rotuloPeriodo = (n: number) => (r.unidade === "mes" ? MESES_COMPLETOS[n - 1] : `${n}º bimestre`);
   const primeiroMes = r.mesesCobertos[0];
@@ -92,18 +77,24 @@ export function PainelOficial({
   const maximo = Math.max(0, ...r.periodos.map((p) => p.valor ?? 0));
   const porHabitante = populacao && r.valor !== null && !(esfera === "estadual" && ufs) ? r.valor / populacao : null;
   const totalTributos = r.porTributo.reduce((s, t) => s + t.valor, 0);
+  // Resumo: os 5 maiores tributos; o resto soma em "Demais" (a lista completa está em "Detalhe por tributo").
+  const principais = r.porTributo.slice(0, 5);
+  const demais = r.porTributo.slice(5);
+  const listaTributos =
+    demais.length > 1 ? [...principais, { tributo: "Demais tributos", valor: demais.reduce((s, t) => s + t.valor, 0) }] : r.porTributo;
 
   return (
     <section className="oficial" aria-labelledby="titulo-oficial">
       <div className="projecao-topo">
-        <h2 id="titulo-oficial">Dados oficiais</h2>
+        <h2 id="titulo-oficial">Dado oficial</h2>
         <span className="selo-oficial">Publicado pela fonte · sem projeção</span>
       </div>
       <p className="projecao-aviso">
         Fonte: {FONTE[esfera]}.{" "}
-        {mostraFed && federalAte > 0 && <>Federal publicado até {MESES_COMPLETOS[federalAte - 1]}/{ano}. </>}
-        {mostraEst && estadualAte > 0 && <>Estadual publicado até {MESES_COMPLETOS[estadualAte - 1]}/{ano}, por bimestre. </>}
-        {esfera === "total" && "O total só soma os períodos que as duas fontes já divulgaram."}
+        {mostraFed && federalAte > 0 && <>Federal até {MESES_COMPLETOS[federalAte - 1]}/{ano}. </>}
+        {mostraEst && estadualAte > 0 && <>Estadual até {MESES_COMPLETOS[estadualAte - 1]}/{ano}, por bimestre. </>}
+        {esfera === "total" && "O total só soma os períodos que as duas fontes já divulgaram. "}
+        {esfera !== "federal" && "O estadual é líquido de repasses a municípios e FUNDEB; o bruto por imposto está em “Detalhe por tributo”."}
       </p>
 
       <div className="oficial-controles">
@@ -140,20 +131,6 @@ export function PainelOficial({
             ))}
           </div>
         )}
-
-        <div className="filtro-ufs">
-          <div className="filtro-ufs-topo">
-            <span>Tributos incluídos · {disponiveis.length - off.size} de {disponiveis.length}</span>
-            <button type="button" className="link-botao" onClick={() => setTributosOff(new Set())} disabled={off.size === 0}>Todos</button>
-          </div>
-          <div className="filtro-ufs-lista">
-            {disponiveis.map((t) => (
-              <button key={t} type="button" className={`aba${off.has(t) ? "" : " aba-ativa"}`} aria-pressed={!off.has(t)} onClick={() => alternarTributo(t)}>
-                {t}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
 
       <div className="card oficial-destaque">
@@ -163,25 +140,13 @@ export function PainelOficial({
         </div>
       </div>
 
-      {esfera !== "federal" && (
-        <p className="nota-grafico nota-liquido">
-          <strong>Atenção:</strong> os valores estaduais deste bloco são <strong>líquidos</strong>: o RREO já desconta os repasses
-          constitucionais aos municípios e o FUNDEB, e cada estado contabiliza essas deduções de um jeito. O valor{" "}
-          <strong>bruto</strong>, por imposto (ICMS, IPVA e outros), está no bloco “Estadual por imposto”, mais abaixo
-          {esfera === "total" ? ". Por isso o Total soma um Federal bruto com um Estadual líquido" : ""}.
-        </p>
-      )}
-
-      <div className="kpis kpis-3">
+      <div className="kpis kpis-2">
         {r.variacao !== null && r.anterior !== null && (
           <Kpi
             rotulo={`Nominal vs. mesmo período de ${ano - 1}`}
             valor={sinal(r.variacao)}
             nota={`${brlGrande(r.anterior)} em ${ano - 1}`}
           />
-        )}
-        {r.variacaoReal !== null && (
-          <Kpi rotulo="Variação real (IPCA)" valor={sinal(r.variacaoReal)} nota={`vs. ${ano - 1}, a preços constantes, só federal`} />
         )}
         {porHabitante !== null && <Kpi rotulo="Por habitante" valor={brlInteiro(porHabitante)} nota="no período, média do Brasil" />}
       </div>
@@ -217,7 +182,7 @@ export function PainelOficial({
           <h2 id="titulo-oficial-tributo">Por tributo</h2>
           <p className="nota-grafico">{titulo}.</p>
           <ul className="tributos">
-            {r.porTributo.map((t) => (
+            {listaTributos.map((t) => (
               <li key={t.tributo}>
                 <div className="tributos-topo">
                   <span>{t.tributo}</span>
