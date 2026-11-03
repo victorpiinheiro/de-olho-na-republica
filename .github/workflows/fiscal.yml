@@ -1,10 +1,12 @@
-name: Mensal (arrecadação, detalhe por tributo e orçamento)
+name: Fiscal (arrecadação, detalhe por tributo e orçamento)
 
-# Dia 5 de cada mês às 6h de Brasília (9h UTC). O Siconfi sai por bimestre: nos outros meses
-# os jobs só confirmam que não há dado novo.
+# Toda terça às 6h17 de Brasília (9h17 UTC). Os relatórios saem em datas variadas (Receita: mensal; Siconfi: por
+# bimestre; DCA: uma vez por ano) e o agendador do GitHub perde execuções: rodando toda semana, o dado novo entra
+# assim que a fonte publicar, sem depender de uma única execução no mês. Os jobs são idempotentes: sem dado novo,
+# só confirmam. Minuto e horário fora do pico de propósito (o GitHub atrasa ou perde os agendamentos do início da hora).
 on:
   schedule:
-    - cron: "17 9 5 * *"
+    - cron: "17 9 * * 2"
   workflow_dispatch:
 
 permissions:
@@ -12,11 +14,11 @@ permissions:
   issues: write
 
 concurrency:
-  group: mensal
+  group: fiscal
   cancel-in-progress: false
 
 jobs:
-  mensal:
+  fiscal:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -51,5 +53,5 @@ jobs:
         if: ${{ failure() }}
         uses: ./.github/actions/alerta-falha
         with:
-          workflow: Mensal
+          workflow: Fiscal
           token: ${{ github.token }}

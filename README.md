@@ -104,11 +104,11 @@ Cada um roda com `npm run sync:<nome>`.
 | `job:tamanho-banco` | Registra o tamanho do banco; falha acima de 400 MB | semanal |
 | `job:revalidar` | Chama `/api/revalidate` ao fim dos outros jobs | após cada workflow |
 | `sync:proposicoes-senado` | Situação e norma das proposições do Senado | diária |
-| `sync:arrecadacao` | Arrecadação federal (Receita) | mensal (dia 5) |
-| `sync:arrecadacao-estados` | Arrecadação estadual, 27 UFs (Siconfi, RREO); leva cerca de 8 min | mensal |
-| `sync:arrecadacao-detalhe` | Federal por tributo (Tabela I) e por base de incidência (Tabela VII) | mensal |
-| `sync:receita-estadual` | Receita estadual bruta por imposto, com deduções (DCA anual) | mensal |
-| `sync:orcamento` | Orçamento da União (Siconfi) | mensal (o RREO sai a cada bimestre) |
+| `sync:arrecadacao` | Arrecadação federal (Receita) | semanal (terça) |
+| `sync:arrecadacao-estados` | Arrecadação estadual, 27 UFs (Siconfi, RREO); leva cerca de 8 min | semanal |
+| `sync:arrecadacao-detalhe` | Federal por tributo (Tabela I) e por base de incidência (Tabela VII) | semanal |
+| `sync:receita-estadual` | Receita estadual bruta por imposto, com deduções (DCA anual) | semanal |
+| `sync:orcamento` | Orçamento da União (Siconfi) | semanal (o RREO sai a cada bimestre) |
 | `sync:eleicoes` | Resultados do TSE | carga única, manual |
 | `sync:presidentes` | Presidentes (Wikidata) | carga única, manual |
 

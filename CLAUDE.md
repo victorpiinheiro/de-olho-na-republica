@@ -92,6 +92,7 @@ O front NUNCA chama APIs do governo diretamente: lê do nosso banco.
 - Variáveis na Vercel: `DATABASE_URL`, `DIRECT_URL`, `REVALIDATE_SECRET`, `PIX_COPIA_E_COLA`, `APOIE_AUTOR` (as duas últimas só para a página /apoie).
 - Nenhuma variável sensível com prefixo `NEXT_PUBLIC_`.
 - Os jobs frequentes também mantêm o Supabase ativo; se pararem, o banco pausa. Por isso, alerta de falha é obrigatório.
+- O agendador do GitHub é de melhor esforço e perde execuções (02/11: 1 de 10 horários de votações). Por isso o `fiscal` roda toda semana (não 1x/mês) e as votações reprocessam 2 dias a cada execução. Execução manual sempre funciona.
 
 ### Agendamento
 | Job | Frequência |
@@ -101,11 +102,11 @@ O front NUNCA chama APIs do governo diretamente: lê do nosso banco.
 | Despesas (Câmara e Senado) | 1x/dia (3h de Brasília) |
 | Lista de parlamentares | 1x/semana |
 | Tamanho do banco | 1x/semana |
-| Arrecadação | mensal (dia 5) |
-| Arrecadação estadual (Siconfi, RREO) | mensal |
-| Detalhe federal por tributo (Receita, Tabelas I e VII) | mensal |
-| Receita estadual bruta por imposto (Siconfi, DCA anual) | mensal (só traz dado novo quando a DCA do ano sai, ~abril) |
-| Orçamento da União (Siconfi) | mensal (o RREO sai a cada bimestre) |
+| Arrecadação | semanal (terça, 6h17 de Brasília; o relatório da Receita sai em data variável) |
+| Arrecadação estadual (Siconfi, RREO) | semanal (mesmo workflow `fiscal`) |
+| Detalhe federal por tributo (Receita, Tabelas I e VII) | semanal (`fiscal`) |
+| Receita estadual bruta por imposto (Siconfi, DCA anual) | semanal (`fiscal`; só traz dado novo quando a DCA do ano sai, ~abril) |
+| Orçamento da União (Siconfi) | semanal (`fiscal`; o RREO sai a cada bimestre) |
 | Eleições 2026 | carga única, rodada manualmente (workflow_dispatch) |
 
 ---
@@ -267,7 +268,7 @@ Regras:
    8 Creative Commons); a foto só entra com licença conhecida e sem restrição declarada; o crédito (autor ou
    "autor desconhecido", licença e link do Commons) fica sempre visível no cartão; a classificação de licença é a do
    Commons, não conferência nossa; imagens via `next/image` (só `thumb.wikimedia.org` e `upload.wikimedia.org`)
-9. **Operação** (código pronto; falta cadastrar segredos e fazer o deploy): workflows em `.github/workflows` (votacoes, diario, semanal, mensal, carga-unica), `POST /api/revalidate` com lista fixa de caminhos, alerta de falha por issue do GitHub, job `tamanho-banco` (falha acima de 400 MB). Passo a passo em `docs/OPERACAO.md`
+9. **Operação** (pronta e no ar em https://de-olho-na-republica.vercel.app; segredos cadastrados; falta provar o agendamento automático do GitHub): workflows em `.github/workflows` (votacoes, diario, semanal, fiscal, carga-unica), `POST /api/revalidate` com lista fixa de caminhos, alerta de falha por issue do GitHub, job `tamanho-banco` (falha acima de 400 MB). Passo a passo em `docs/OPERACAO.md`
 
 ## Como trabalhar comigo
 - Antes de codar uma etapa, mostre o plano (arquivos, modelos, decisões) e espere meu ok.

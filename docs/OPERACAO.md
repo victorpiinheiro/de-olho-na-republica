@@ -17,13 +17,14 @@ GitHub Actions (cron) ──► jobs gravam no Supabase ──► POST /api/reva
 | `votacoes.yml` | de hora em hora (minuto 37), 8h–20h, seg–sex | votações da Câmara e do Senado (últimos 2 dias) |
 | `diario.yml` | todo dia, 3h23 | despesas da Câmara, CEAPS, proposições da Câmara e do Senado |
 | `semanal.yml` | domingo, 4h41 | deputados, senadores, tamanho do banco |
-| `mensal.yml` | dia 5, 6h17 | arrecadação federal e estadual, orçamento, detalhe federal por tributo, receita estadual bruta por imposto (DCA) |
+| `fiscal.yml` | toda terça, 6h17 | arrecadação federal e estadual, orçamento, detalhe federal por tributo, receita estadual bruta por imposto (DCA) |
 | `carga-unica.yml` | só manual | `sync-eleicoes` ou `sync-presidentes` (escolhido na hora) |
 
-- O Mensal instala o `poppler-utils` (`pdftotext`) no início, porque lê os PDFs da Receita; o computador do GitHub não o traz.
+- O Fiscal instala o `poppler-utils` (`pdftotext`) no início, porque lê os PDFs da Receita; o computador do GitHub não o traz.
 - Todos têm `workflow_dispatch`: Actions → escolher o workflow → **Run workflow**.
 - Cada workflow roda os jobs em sequência. Um job que falha não impede os seguintes, mas a atualização das páginas só acontece se **tudo** deu certo.
 - `concurrency` impede dois jobs do mesmo workflow ao mesmo tempo.
+- O agendador do GitHub é de melhor esforço: pode atrasar ou perder execuções (em 02/11, só 1 de 10 horários de votações rodou sozinha). Por isso o Fiscal roda toda semana, e não uma vez por mês, e as votações reprocessam os últimos 2 dias a cada execução. Execuções manuais (`workflow_dispatch`) sempre funcionam.
 - Os horários do cron são em UTC (Brasília = UTC−3). Nenhum está no minuto 0: o GitHub atrasa ou perde os agendamentos do início da hora.
 - O GitHub **desativa workflows agendados** em repositório sem atividade por 60 dias. Se isso acontecer, reative em Actions.
 
@@ -78,7 +79,7 @@ Para receber e-mail: GitHub → Settings → Notifications, e "Watch" no reposit
 1. Importe o repositório do GitHub na Vercel.
 2. Cadastre as variáveis acima na Vercel.
 3. O `vercel.json` já fixa a região `iad1` (a mesma do banco). O `build` roda `prisma migrate deploy && next build`.
-4. Depois do primeiro deploy, cadastre `SITE_URL` no GitHub e rode **Mensal** à mão para popular e revalidar.
+4. Depois do primeiro deploy, cadastre `SITE_URL` no GitHub e rode **Fiscal** à mão para popular e revalidar.
 5. Primeira carga em banco novo, nesta ordem: `sync-deputados`, `sync-senadores`, `sync-despesas`, `sync-ceaps`, `sync-votacoes` (com `--desde` do início da legislatura), `sync-votacoes-senado`, `sync-proposicoes`, `sync-proposicoes-senado`, `sync-arrecadacao`, `sync-arrecadacao-estados`, `sync-orcamento`, e pelo workflow **Carga única**: `sync-eleicoes` e `sync-presidentes`.
 
 ## Rodando um job localmente
