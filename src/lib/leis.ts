@@ -1,12 +1,74 @@
 export type Aba = "todas" | "nominais" | "viraram-lei" | "aprovadas-camara" | "aprovadas-senado" | "rejeitadas";
 
-export const ABAS: { chave: Aba; rotulo: string; href: string }[] = [
-  { chave: "todas", rotulo: "Todas", href: "/leis" },
-  { chave: "nominais", rotulo: "Com votos nominais", href: "/leis/nominais" },
-  { chave: "viraram-lei", rotulo: "Viraram lei", href: "/leis/viraram-lei" },
-  { chave: "aprovadas-camara", rotulo: "Aprovadas na Câmara", href: "/leis/aprovadas-camara" },
-  { chave: "aprovadas-senado", rotulo: "Aprovadas no Senado", href: "/leis/aprovadas-senado" },
-  { chave: "rejeitadas", rotulo: "Rejeitadas", href: "/leis/rejeitadas" },
+export interface InfoAba {
+  chave: Aba;
+  rotulo: string;
+  href: string;
+  // Texto fixo que explica o que a aba mostra, exibido abaixo da lista.
+  explicacao: { titulo: string; texto: string };
+}
+
+export const ABAS: InfoAba[] = [
+  {
+    chave: "todas",
+    rotulo: "Todas",
+    href: "/leis",
+    explicacao: {
+      titulo: "O que aparece aqui",
+      texto:
+        "Toda proposição (projeto de lei, PEC, medida provisória e outras) que teve pelo menos uma votação nos plenários da Câmara ou do Senado, da votação mais recente para a mais antiga. O selo de cada card mostra em que ponto ela está.",
+    },
+  },
+  {
+    chave: "nominais",
+    rotulo: "Com votos nominais",
+    href: "/leis/nominais",
+    explicacao: {
+      titulo: "O que é voto nominal",
+      texto:
+        "Votação em que cada parlamentar registra o próprio voto (sim, não ou abstenção) no painel, então dá para ver como cada um votou. Na votação simbólica, feita por acordo de líderes, ninguém vota individualmente e não há placar: essas ficam de fora desta aba.",
+    },
+  },
+  {
+    chave: "viraram-lei",
+    rotulo: "Viraram lei",
+    href: "/leis/viraram-lei",
+    explicacao: {
+      titulo: "O que significa “virou lei”",
+      texto:
+        "A proposição foi transformada em norma jurídica (lei ordinária, lei complementar, emenda constitucional ou decreto legislativo). Aprovar numa casa não basta: é preciso passar pelas duas e, em geral, ter sanção ou promulgação. Uma lei votada nas duas casas aparece num card só.",
+    },
+  },
+  {
+    chave: "aprovadas-camara",
+    rotulo: "Aprovadas na Câmara",
+    href: "/leis/aprovadas-camara",
+    explicacao: {
+      titulo: "O que são aprovadas na Câmara",
+      texto:
+        "Proposições que os deputados aprovaram e que seguem para o Senado: estão aguardando envio ou apreciação lá. Ainda não são lei, e o Senado pode aprovar, alterar (e devolver à Câmara) ou rejeitar.",
+    },
+  },
+  {
+    chave: "aprovadas-senado",
+    rotulo: "Aprovadas no Senado",
+    href: "/leis/aprovadas-senado",
+    explicacao: {
+      titulo: "O que são aprovadas no Senado",
+      texto:
+        "Proposições cuja última votação no Senado foi aprovada e que ainda não viraram lei. Dependendo do caso, voltam à Câmara (se o Senado alterou o texto) ou aguardam sanção presidencial.",
+    },
+  },
+  {
+    chave: "rejeitadas",
+    rotulo: "Rejeitadas",
+    href: "/leis/rejeitadas",
+    explicacao: {
+      titulo: "O que são rejeitadas",
+      texto:
+        "Proposições cuja última votação em plenário foi rejeitada. Na Câmara, só entram as que também foram arquivadas; no Senado, vale o resultado da última votação. Uma proposição rejeitada em uma casa não vira lei.",
+    },
+  },
 ];
 
 // Situações oficiais (referencias/situacoesProposicao) de quem já passou pela Câmara e

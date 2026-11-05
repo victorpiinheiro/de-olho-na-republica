@@ -1076,6 +1076,26 @@ h2 {
   height: 16px;
 }
 
+.explicacao-aba {
+  margin: 16px 0 20px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.explicacao-aba h2 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.explicacao-aba p {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
 .nota-rodape {
   margin: 0;
   padding-top: 12px;
