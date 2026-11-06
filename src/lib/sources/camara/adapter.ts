@@ -188,3 +188,39 @@ export function extrairNorma(tramitacoes: TramitacaoApi[]): { norma: string; dat
 
 export const extrairNormaJuridica = (tramitacoes: TramitacaoApi[]): string | null =>
   extrairNorma(tramitacoes)?.norma ?? null;
+
+// Vigência de uma medida provisória, lida das tramitações oficiais (nada é calculado por nós):
+//  - "Abertura de Prazo": "... Congresso Nacional: 04/11/2026 a 12/02/2027." (início e fim dos primeiros 60 dias + recesso)
+//  - "Prorrogação de Prazo": "... Data final após prorrogação: 01/06/2026." (a prorrogação por mais 60 dias)
+// O texto da abertura também traz uma "Prorrogação pelo Congresso Nacional: <data>" que é só previsão; vale a tramitação
+// de prorrogação de fato. Sem a abertura de prazo (MPV recém-chegada) devolve null, e a tela diz que o prazo não foi aberto.
+const VIGENCIA = /Congresso Nacional:\s*(\d{2}\/\d{2}\/\d{4})\s+a\s+(\d{2}\/\d{2}\/\d{4})/;
+const FIM_PRORROGADO = /Data final após prorroga[çc][ãa]o:\s*(\d{2}\/\d{2}\/\d{4})/i;
+
+const dataBrParaDate = (s: string) => {
+  const [d, m, a] = s.split("/");
+  return new Date(Date.UTC(Number(a), Number(m) - 1, Number(d)));
+};
+
+export function extrairVigencia(
+  tramitacoes: TramitacaoApi[],
+): { inicio: Date; fim: Date; prorrogada: boolean } | null {
+  const abertura = tramitacoes.find((t) => t.descricaoTramitacao === "Abertura de Prazo" && VIGENCIA.test(t.despacho ?? ""));
+  const m = abertura && VIGENCIA.exec(abertura.despacho ?? "");
+  if (!m) return null;
+  const prorrogacoes = tramitacoes
+    .filter((t) => t.descricaoTramitacao === "Prorrogação de Prazo")
+    .map((t) => FIM_PRORROGADO.exec(t.despacho ?? "")?.[1])
+    .filter((x): x is string => !!x)
+    .map(dataBrParaDate)
+    .sort((a, b) => b.getTime() - a.getTime());
+  const fimProrrogado = prorrogacoes[0];
+  return {
+    inicio: dataBrParaDate(m[1]!),
+    fim: fimProrrogado ?? dataBrParaDate(m[2]!),
+    prorrogada: fimProrrogado !== undefined,
+  };
+}
+
+// Medida provisória de crédito extraordinário: abre crédito no orçamento, não muda regra. É a maioria e tende a poluir a lista.
+export const ehCreditoExtraordinario = (ementa: string) => /^\s*abre cr[eé]dito extraordin[aá]rio/i.test(ementa);

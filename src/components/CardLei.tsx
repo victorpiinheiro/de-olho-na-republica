@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Placar } from "@/components/Placar";
 import { StatusLei } from "@/components/StatusLei";
-import { dataBr } from "@/lib/format";
+import { dataBr, dataBrDia } from "@/lib/format";
 import { NOME_CASA, rotuloResultado } from "@/lib/leis";
 import type { CardLei as Card } from "@/lib/queries/leis";
 
@@ -20,6 +20,19 @@ export function CardLei({ lei }: { lei: Card }) {
           </span>
         )}
       </div>
+
+      {lei.mp && (
+        <p className="lei-votacao">
+          {lei.mp.creditoExtraordinario && <strong>Crédito extraordinário · </strong>}
+          {lei.mp.apresentadaIso && <>Editada em {dataBrDia(lei.mp.apresentadaIso)}</>}
+          {lei.mp.vigenciaFimIso && (
+            <>
+              {lei.mp.apresentadaIso ? " · " : ""}Prazo no Congresso até {dataBrDia(lei.mp.vigenciaFimIso)}
+              {lei.mp.prorrogada ? " (prorrogado)" : ""}
+            </>
+          )}
+        </p>
+      )}
 
       <h3 className="lei-ementa">
         <Link href={`/leis/proposicao/${lei.id}`}>{lei.ementa}</Link>

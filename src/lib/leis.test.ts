@@ -170,6 +170,35 @@ describe("statusDe", () => {
   });
 });
 
+describe("statusDe de medida provisória sem votação", () => {
+  const mp = (situacao: string | null, vigenciaFim: Date | null) => ({
+    casa: "CAMARA" as const,
+    virouLei: false,
+    situacao,
+    votacoes: [],
+    siglaTipo: "MPV",
+    vigenciaFim,
+  });
+  const hoje = new Date(2026, 10, 6);
+  it("dentro do prazo, está em vigor", () => {
+    expect(statusDe(mp(null, new Date(Date.UTC(2027, 1, 12))), hoje).rotulo).toBe("Em vigor");
+    expect(statusDe(mp(null, new Date(Date.UTC(2026, 10, 6))), hoje).rotulo).toBe("Em vigor"); // último dia ainda vale
+  });
+  it("prazo vencido sem situação oficial ainda: prazo encerrado", () => {
+    expect(statusDe(mp(null, new Date(Date.UTC(2026, 10, 5))), hoje).rotulo).toBe("Prazo encerrado");
+  });
+  it("sem abertura de prazo", () => {
+    expect(statusDe(mp(null, null), hoje).rotulo).toBe("Prazo ainda não aberto");
+  });
+  it("com situação oficial, vale a situação", () => {
+    expect(statusDe(mp("Perdeu a Eficácia", new Date(Date.UTC(2026, 3, 2))), hoje).rotulo).toBe("Perdeu a Eficácia");
+  });
+  it("pertence à aba de medidas provisórias, votada ou não", () => {
+    expect(pertenceAba(mp(null, null), "medidas-provisorias")).toBe(true);
+    expect(pertenceAba({ ...mp(null, null), siglaTipo: "PL" }, "medidas-provisorias")).toBe(false);
+  });
+});
+
 describe("autoriaTexto", () => {
   it("monta prefixo, partido–UF e 'e outros N'", () => {
     expect(autoriaTexto({ nome: "Helena Duarte", tipo: "Deputado(a)", partido: "PT", uf: "SP" }, 0)).toBe("Dep. Helena Duarte (PT–SP)");

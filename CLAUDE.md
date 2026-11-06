@@ -99,6 +99,7 @@ O front NUNCA chama APIs do governo diretamente: lê do nosso banco.
 |---|---|
 | Votações (Câmara e Senado, janela de 2 dias) | de hora em hora, 8h–20h de Brasília, dias úteis |
 | Proposições (situação e data da lei) | 1x/dia (reconsulta todas as pendentes, ~6 min) |
+| Medidas provisórias (Câmara, legislatura atual, com vigência) | 1x/dia (`sync-medidas-provisorias`, no workflow `diario`; só rebusca as que não estão encerradas) |
 | Despesas (Câmara e Senado) | 1x/dia (3h de Brasília) |
 | Lista de parlamentares | 1x/semana |
 | Tamanho do banco | 1x/semana |
@@ -214,7 +215,7 @@ Regras:
    tabela ranqueada por gasto com mini-barra, paginação
 3. **Perfil do parlamentar**: cabeçalho, KPIs (cota usada × limite, notas, presença, proposições),
    gasto por categoria, gasto por mês, tabela de despesas com link "Ver nota"
-4. **Leis e votações**: abas (Todas, Com votos nominais, Viraram lei, Aprovadas na Câmara, Aprovadas no Senado,
+4. **Leis e votações**: abas (Todas, Com votos nominais, Viraram lei, Medidas provisórias, Aprovadas na Câmara, Aprovadas no Senado,
    Rejeitadas), cards com status, código, título, resumo, autor e placar em barra empilhada (ou "votação simbólica").
    A página (estática, 1 h) traz os 100 primeiros de cada aba; **"Carregar mais"** (100 por vez) e o **filtro por ano da
    votação mostrada** buscam o resto do banco em `GET /api/leis?aba=&pagina=&ano=` (parâmetros validados em
@@ -228,6 +229,10 @@ Regras:
    milhar; em "Viraram lei" o card aparece se QUALQUER das casas bater. O texto é o oficial: nem sempre traz o nome popular
    (a Emenda Constitucional 132/2023 está como "Altera o Sistema Tributário Nacional"). O teste compara o SQL com um
    cálculo independente em JS
+   **Medidas provisórias** (aba da tela 4): lista TODAS as MPV da legislatura atual (desde 2023), mesmo sem votação em plenário,
+   vindas de `/proposicoes?siglaTipo=MPV` da Câmara. A vigência (início, fim, prorrogada) é lida do texto das tramitações
+   "Abertura de Prazo" e "Prorrogação de Prazo" (nada é calculado por nós); MPV de crédito extraordinário leva um aviso no card.
+   O mesmo número na Câmara e no Senado sai num card só. A API do Senado `materia/pesquisa` está descontinuada desde 02/2026
 5. **Detalhe da lei**: resumo, ementa oficial, linha do tempo da tramitação, resultado, autoria,
    tabela de voto por partido, grade de votos nominais filtrável
 6. **Eleições**: filtros de cargo e UF, KPIs de comparecimento 1º → 2º turno, finalistas com barras

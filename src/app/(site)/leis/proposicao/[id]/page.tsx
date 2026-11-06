@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { LinhaDoTempo } from "@/components/LinhaDoTempo";
 import { StatusLei } from "@/components/StatusLei";
 import { VotosDaProposicao } from "@/components/VotosDaProposicao";
+import { dataBrDia } from "@/lib/format";
 import { statusDe } from "@/lib/leis";
 import { buscarLei } from "@/lib/queries/leis";
 
@@ -25,6 +26,8 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     casa: p.casa,
     virouLei: p.virouLei,
     situacao: p.situacao,
+    siglaTipo: p.siglaTipo,
+    vigenciaFim: p.vigenciaFimIso ? new Date(p.vigenciaFimIso) : null,
     votacoes: votacoes.map((v) => ({
       data: new Date(v.dataIso),
       descricao: v.descricao,
@@ -47,6 +50,12 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         </div>
         <h1>{p.codigo}</h1>
         <p className="lead">{p.ementa}</p>
+        {p.siglaTipo === "MPV" && p.vigenciaFimIso && (
+          <p className="lei-fonte">
+            Prazo da medida provisória no Congresso: até {dataBrDia(p.vigenciaFimIso)}
+            {p.prorrogada ? " (já prorrogado por mais 60 dias)" : " (pode ser prorrogado uma vez por mais 60 dias)"}.
+          </p>
+        )}
         <p className="lei-fonte">
           Ementa oficial, conforme {p.casa === "SENADO" ? "o Senado Federal" : "a Câmara dos Deputados"}.
           {p.urlInteiroTeor && (

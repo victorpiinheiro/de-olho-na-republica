@@ -14,6 +14,7 @@ import {
   type VotacaoResumo,
 } from "@/lib/leis";
 import { termosDaBusca } from "@/lib/leis-api";
+import { ehCreditoExtraordinario } from "@/lib/sources/camara/adapter";
 
 export const POR_ABA = 100;
 
@@ -39,6 +40,8 @@ export interface CardLei {
   totalVotacoes: number;
   // Só em "Viraram lei": a mesma norma também tem registro na outra casa (um card por lei, não por casa).
   tambem: OutraCasa[];
+  // Só medida provisória: prazo no Congresso e data em que chegou.
+  mp: { vigenciaFimIso: string | null; prorrogada: boolean; apresentadaIso: string | null; creditoExtraordinario: boolean } | null;
   destaque: {
     dataIso: string;
     descricao: string;
@@ -61,6 +64,8 @@ function condicaoDaAba(aba: Aba): Prisma.Sql {
       return Prisma.sql`v.tem_nominal`;
     case "viraram-lei":
       return Prisma.sql`p."virouLei"`;
+    case "medidas-provisorias":
+      return Prisma.sql`p."siglaTipo" = 'MPV'`;
     case "aprovadas-camara":
       return Prisma.sql`(p.casa = 'CAMARA' AND NOT p."virouLei" AND p.situacao = ANY(${SITUACOES_APROVADA_CAMARA}::text[]))`;
     case "aprovadas-senado":
@@ -74,7 +79,9 @@ function condicaoDaAba(aba: Aba): Prisma.Sql {
 // Em "Viraram lei" os registros que viraram A MESMA norma (um da Câmara, um do Senado) formam um grupo e saem num card
 // só. O Senado escreve "Lei 14597/2023" e a Câmara "Lei Ordinária 14597/2023": é a mesma lei, então normaliza.
 // Nas outras abas não há um identificador seguro que ligue o mesmo projeto nas duas casas: cada registro é um grupo.
+// Em "Medidas provisórias" o mesmo número de MPV na Câmara e no Senado é a mesma MP: um card só (o da Câmara, que tem a vigência).
 function chaveDoGrupo(aba: Aba): Prisma.Sql {
+  if (aba === "medidas-provisorias") return Prisma.sql`'MPV ' || p.numero::text || '/' || p.ano::text`;
   return aba === "viraram-lei"
     ? Prisma.sql`COALESCE(regexp_replace(p."normaJuridica", '^Lei Ordinária', 'Lei'), 'id:' || p.id::text)`
     : Prisma.sql`p.id::text`;
@@ -98,6 +105,9 @@ interface LinhaLei {
   totalAutores: number;
   total: number;
   anos: number[];
+  vigenciaFim: Date | null;
+  prorrogada: boolean;
+  dataApresentacao: Date | null;
   tambem: OutraCasa[] | null;
   votacoes: (Omit<VotacaoResumo, "data"> & { data: string })[];
 }
@@ -148,6 +158,16 @@ export async function listarLeis(aba: Aba, { offset = 0, limite = POR_ABA, ano =
       : Prisma.sql`(${Prisma.join(termos.map((t) => Prisma.sql`strpos(${normalizadoNoBanco(TEXTO_DA_PROPOSICAO)}, ${t}) > 0`), " AND ")})`;
   const juntaAutores = termos.length === 0 ? Prisma.empty : JUNTA_AUTORES;
   const filtroAno = ano === null ? Prisma.sql`TRUE` : Prisma.sql`extract(year FROM destaque_data)::int = ${ano}::int`;
+  const ehMp = aba === "medidas-provisorias";
+  // Medida provisória pode nunca ter ido a plenário: sem votação, vale a data de apresentação.
+  const juntaVotos = ehMp ? Prisma.sql`LEFT JOIN v ON v.pid = p.id` : Prisma.sql`JOIN v ON v.pid = p.id`;
+  const dataOrdem = ehMp
+    ? Prisma.sql`COALESCE(p."dataApresentacao"::timestamp, v.ultima_data)`
+    : Prisma.sql`v.ultima_data`;
+  const dataDestaque = ehMp
+    ? Prisma.sql`COALESCE(p."dataApresentacao"::timestamp, v.destaque_data)`
+    : Prisma.sql`v.destaque_data`;
+  const preferirCamara = ehMp ? Prisma.sql`(casa = 'CAMARA') DESC,` : Prisma.empty;
   const linhas = await db.$queryRaw<LinhaLei[]>`
     WITH v AS (
       SELECT "proposicaoId" AS pid,
@@ -161,9 +181,10 @@ export async function listarLeis(aba: Aba, { offset = 0, limite = POR_ABA, ano =
       GROUP BY "proposicaoId"
     ),
     cand AS (
-      SELECT p.id, v.ultima_data, v.destaque_data, ${chaveDoGrupo(aba)} AS grupo, ${casou} AS casou
+      SELECT p.id, p.casa::text AS casa, ${dataOrdem} AS ultima_data, ${dataDestaque} AS destaque_data,
+             ${chaveDoGrupo(aba)} AS grupo, ${casou} AS casou
       FROM "Proposicao" p
-      JOIN v ON v.pid = p.id
+      ${juntaVotos}
       ${juntaAutores}
       WHERE ${condicaoDaAba(aba)}
     ),
@@ -173,7 +194,7 @@ export async function listarLeis(aba: Aba, { offset = 0, limite = POR_ABA, ano =
     primarias AS (
       SELECT DISTINCT ON (grupo) id, ultima_data, destaque_data, grupo, grupo_casou
       FROM marcadas
-      ORDER BY grupo, ultima_data DESC, id DESC
+      ORDER BY grupo, ${preferirCamara} ultima_data DESC, id DESC
     ),
     sel AS (
       SELECT id, ultima_data, grupo,
@@ -185,6 +206,7 @@ export async function listarLeis(aba: Aba, { offset = 0, limite = POR_ABA, ano =
       LIMIT ${limite} OFFSET ${offset}
     )
     SELECT p.id, p.casa::text AS casa, p."siglaTipo", p.numero, p.ano, p.ementa, p.situacao, p."virouLei", p."normaJuridica",
+           p."vigenciaFim", p."prorrogada", p."dataApresentacao",
            a.nome AS "autorNome", a.tipo AS "autorTipo", a."parlamentarId" AS "autorParlamentarId",
            pa.partido AS "autorPartido", pa.uf AS "autorUf",
            (SELECT count(*)::int FROM "Autor" WHERE "proposicaoId" = p.id) AS "totalAutores",
@@ -218,7 +240,14 @@ export async function listarLeis(aba: Aba, { offset = 0, limite = POR_ABA, ano =
       situacao: p.situacao,
       virouLei: p.virouLei,
       normaJuridica: p.normaJuridica,
-      status: statusDe({ casa: p.casa, virouLei: p.virouLei, situacao: p.situacao, votacoes }),
+      status: statusDe({
+        casa: p.casa,
+        virouLei: p.virouLei,
+        situacao: p.situacao,
+        votacoes,
+        siglaTipo: p.siglaTipo,
+        vigenciaFim: p.vigenciaFim,
+      }),
       autoria:
         p.autorNome === null
           ? null
@@ -231,6 +260,15 @@ export async function listarLeis(aba: Aba, { offset = 0, limite = POR_ABA, ano =
             },
       totalVotacoes: votacoes.length,
       tambem: p.tambem ?? [],
+      mp:
+        p.siglaTipo === "MPV"
+          ? {
+              vigenciaFimIso: p.vigenciaFim ? p.vigenciaFim.toISOString() : null,
+              prorrogada: p.prorrogada,
+              apresentadaIso: p.dataApresentacao ? p.dataApresentacao.toISOString() : null,
+              creditoExtraordinario: ehCreditoExtraordinario(p.ementa),
+            }
+          : null,
       destaque: d && {
         dataIso: d.data.toISOString(),
         descricao: d.descricao,
@@ -322,6 +360,8 @@ export async function buscarLei(id: number) {
       urlInteiroTeor: p.urlInteiroTeor,
       dataApresentacaoIso: p.dataApresentacao ? p.dataApresentacao.toISOString() : null,
       dataLeiIso: p.dataLei ? p.dataLei.toISOString() : null,
+      vigenciaFimIso: p.vigenciaFim ? p.vigenciaFim.toISOString() : null,
+      prorrogada: p.prorrogada,
     },
     autores: p.autores.map((a) => ({
       nome: a.nome,

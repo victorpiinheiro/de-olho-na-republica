@@ -123,3 +123,11 @@ export const tramitacaoSchema = z.object({
   despacho: z.string().nullish(),
 });
 export type TramitacaoApi = z.infer<typeof tramitacaoSchema>;
+
+// GET /proposicoes?siglaTipo=MPV&ano=... (lista). Só o id interessa: o detalhe vem de /proposicoes/{id}.
+export const proposicaoListaSchema = z.object({
+  id: z.number().int(),
+  siglaTipo: z.literal("MPV"),
+  numero: z.number().int(),
+  ano: z.number().int(),
+});

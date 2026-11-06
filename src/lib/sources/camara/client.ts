@@ -8,6 +8,7 @@ import {
   deputadoSchema,
   despesaCsvSchema,
   orientacaoSchema,
+  proposicaoListaSchema,
   proposicaoSchema,
   tramitacaoSchema,
   votacaoListaSchema,
@@ -48,6 +49,10 @@ export const listarOrientacoes = (id: string) =>
   fetchAllPages(`${BASE}/votacoes/${id}/orientacoes`, orientacaoSchema);
 
 export const buscarProposicao = (id: number) => fetchOne(`${BASE}/proposicoes/${id}`, proposicaoSchema);
+
+// Todas as medidas provisórias apresentadas no ano.
+export const listarMedidasProvisorias = (ano: number) =>
+  fetchAllPages(`${BASE}/proposicoes?siglaTipo=MPV&ano=${ano}&itens=100&ordem=ASC&ordenarPor=id`, proposicaoListaSchema);
 
 export const listarAutores = (id: number) =>
   fetchAllPages(`${BASE}/proposicoes/${id}/autores`, autorSchema);

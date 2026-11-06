@@ -88,6 +88,10 @@ model Proposicao {
   normaJuridica    String?
   dataApresentacao DateTime? @db.Date
   dataLei          DateTime? @db.Date
+  // Só medida provisória (MPV): vigência do Congresso (60 dias + 60 de prorrogação), lida da tramitação oficial.
+  vigenciaInicio   DateTime? @db.Date
+  vigenciaFim      DateTime? @db.Date
+  prorrogada       Boolean   @default(false)
   atualizadoEm     DateTime  @updatedAt
 
   autores  Autor[]

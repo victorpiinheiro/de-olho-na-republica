@@ -1,4 +1,4 @@
-export type Aba = "todas" | "nominais" | "viraram-lei" | "aprovadas-camara" | "aprovadas-senado" | "rejeitadas";
+export type Aba = "todas" | "nominais" | "viraram-lei" | "medidas-provisorias" | "aprovadas-camara" | "aprovadas-senado" | "rejeitadas";
 
 export interface InfoAba {
   chave: Aba;
@@ -37,6 +37,16 @@ export const ABAS: InfoAba[] = [
       titulo: "O que significa “virou lei”",
       texto:
         "A proposição foi transformada em norma jurídica (lei ordinária, lei complementar, emenda constitucional ou decreto legislativo). Aprovar numa casa não basta: é preciso passar pelas duas e, em geral, ter sanção ou promulgação. Uma lei votada nas duas casas aparece num card só.",
+    },
+  },
+  {
+    chave: "medidas-provisorias",
+    rotulo: "Medidas provisórias",
+    href: "/leis/medidas-provisorias",
+    explicacao: {
+      titulo: "O que é uma medida provisória",
+      texto:
+        "Norma com força de lei editada pelo Presidente da República em caso de relevância e urgência, e que vale desde a publicação. Precisa ser aprovada pelo Congresso em 60 dias, prorrogáveis por mais 60; se não for, perde a eficácia. Aqui entram todas as da legislatura atual, mesmo as que ainda não foram votadas em plenário. O prazo vem do Congresso. As de crédito extraordinário só liberam dinheiro no orçamento e levam esse aviso no card.",
     },
   },
   {
@@ -122,6 +132,9 @@ export interface PropAba {
   virouLei: boolean;
   situacao: string | null;
   votacoes: VotacaoResumo[];
+  // Só para medida provisória (MPV): fim da vigência no Congresso, lido da tramitação oficial.
+  siglaTipo?: string;
+  vigenciaFim?: Date | null;
 }
 
 // Câmara: a situação oficial da proposição diz se já seguiu ao Senado ou foi arquivada.
@@ -136,6 +149,8 @@ export function pertenceAba(p: PropAba, aba: Aba): boolean {
       return p.votacoes.some(temVotoNominal);
     case "viraram-lei":
       return p.virouLei;
+    case "medidas-provisorias":
+      return p.siglaTipo === "MPV";
     case "aprovadas-camara":
       return (
         p.casa === "CAMARA" &&
@@ -152,6 +167,8 @@ export function pertenceAba(p: PropAba, aba: Aba): boolean {
         : ultima?.aprovada === false;
   }
 }
+
+const inicioDoDia = (d: Date) => Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
 
 export const codigo = (p: { siglaTipo: string; numero: number; ano: number }) =>
   `${p.siglaTipo} ${p.numero}/${p.ano}`;
@@ -170,8 +187,13 @@ export function rotuloResultado(aprovada: boolean | null): string {
 export type TomStatus = "lei" | "rejeitada" | "neutro";
 
 // Rótulo do selo do card, na ordem de importância: virou lei > rejeitada > aprovada na Câmara > situação.
-export function statusDe(p: PropAba): { rotulo: string; tom: TomStatus } {
+export function statusDe(p: PropAba, hoje: Date = new Date()): { rotulo: string; tom: TomStatus } {
   if (p.virouLei) return { rotulo: "Virou lei", tom: "lei" };
+  // MPV sem situação oficial ainda está no prazo do Congresso (ou o prazo acabou e a Câmara ainda não atualizou a situação).
+  if (p.siglaTipo === "MPV" && p.situacao === null && p.votacoes.length === 0) {
+    if (!p.vigenciaFim) return { rotulo: "Prazo ainda não aberto", tom: "neutro" };
+    return { rotulo: p.vigenciaFim.getTime() >= inicioDoDia(hoje) ? "Em vigor" : "Prazo encerrado", tom: "neutro" };
+  }
   if (pertenceAba(p, "rejeitadas")) return { rotulo: "Rejeitada", tom: "rejeitada" };
   if (pertenceAba(p, "aprovadas-camara")) return { rotulo: "Aprovada na Câmara", tom: "neutro" };
   if (pertenceAba(p, "aprovadas-senado")) return { rotulo: "Aprovada no Senado", tom: "neutro" };
