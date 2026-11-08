@@ -545,7 +545,7 @@ h2 {
 }
 
 .filtros-leis {
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 2fr 1.4fr 1fr;
   padding: 0;
   border: 0;
   background: none;
@@ -705,6 +705,16 @@ h2 {
 @media (max-width: 800px) {
   .filtros-leis {
     grid-template-columns: 1fr;
+  }
+
+  .perfil-topo {
+    flex-wrap: wrap;
+  }
+
+  .perfil-acoes {
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-start;
   }
 }
 
@@ -876,6 +886,18 @@ h2 {
   margin-left: auto;
   text-decoration: none;
   color: var(--text);
+}
+
+.perfil-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+  justify-content: flex-end;
+}
+
+.perfil-topo .perfil-acoes .btn-link {
+  margin-left: 0;
 }
 
 /* Lista de parlamentares (mockup 2) */

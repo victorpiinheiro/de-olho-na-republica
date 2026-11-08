@@ -5,11 +5,11 @@ const ler = (q: string) => lerParametrosLeis(new URLSearchParams(q));
 
 describe("lerParametrosLeis", () => {
   it("aceita aba, página e ano", () => {
-    expect(ler("aba=viraram-lei&pagina=2&ano=2025")).toEqual({ ok: true, valor: { aba: "viraram-lei", pagina: 2, ano: 2025, busca: null } });
+    expect(ler("aba=viraram-lei&pagina=2&ano=2025")).toEqual({ ok: true, valor: { aba: "viraram-lei", pagina: 2, ano: 2025, busca: null, autor: null } });
   });
 
   it("página e ano são opcionais", () => {
-    expect(ler("aba=todas")).toEqual({ ok: true, valor: { aba: "todas", pagina: 0, ano: null, busca: null } });
+    expect(ler("aba=todas")).toEqual({ ok: true, valor: { aba: "todas", pagina: 0, ano: null, busca: null, autor: null } });
     expect(ler("aba=todas&ano=todos&pagina=0")).toMatchObject({ ok: true, valor: { ano: null } });
     expect(ler("aba=todas&ano=")).toMatchObject({ ok: true, valor: { ano: null } });
   });
@@ -58,7 +58,7 @@ describe("busca (q)", () => {
     expect(ler("aba=todas&q=%27%3B%20DROP%20TABLE%20x%3B--")).toMatchObject({ ok: true, valor: { busca: "'; DROP TABLE x;--" } });
   });
   it("vale junto com aba, ano e página", () => {
-    expect(ler("aba=viraram-lei&ano=2024&pagina=1&q=reforma")).toEqual({ ok: true, valor: { aba: "viraram-lei", pagina: 1, ano: 2024, busca: "reforma" } });
+    expect(ler("aba=viraram-lei&ano=2024&pagina=1&q=reforma")).toEqual({ ok: true, valor: { aba: "viraram-lei", pagina: 1, ano: 2024, busca: "reforma", autor: null } });
   });
 });
 
@@ -73,5 +73,23 @@ describe("normalizarBusca e termosDaBusca", () => {
     expect(termosDaBusca("reforma  reforma tributária")).toEqual(["reforma", "tributaria"]);
     expect(termosDaBusca("a b c d e f g h")).toHaveLength(6);
     expect(termosDaBusca("   ")).toEqual([]);
+  });
+});
+
+describe("autor", () => {
+  it("é opcional: sem autor (ou vazio) vale qualquer um", () => {
+    expect(ler("aba=todas")).toMatchObject({ ok: true, valor: { autor: null } });
+    expect(ler("aba=todas&autor=")).toMatchObject({ ok: true, valor: { autor: null } });
+  });
+  it("aceita o id do parlamentar e vale junto com aba, ano, busca e página", () => {
+    expect(ler("aba=viraram-lei&ano=2024&pagina=1&q=saude&autor=1234")).toEqual({
+      ok: true,
+      valor: { aba: "viraram-lei", pagina: 1, ano: 2024, busca: "saude", autor: 1234 },
+    });
+  });
+  it("só aceita número inteiro positivo (nada de texto, sinal, decimal ou zero)", () => {
+    for (const ruim of ["abc", "-1", "1.5", "0", "1e3", "12 3", "1234567890", "'; DROP TABLE x;--"]) {
+      expect(ler(`aba=todas&autor=${encodeURIComponent(ruim)}`)).toEqual({ ok: false, motivo: "autor inválido" });
+    }
   });
 });

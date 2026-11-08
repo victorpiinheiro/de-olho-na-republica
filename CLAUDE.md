@@ -213,7 +213,7 @@ Regras:
    (metodologia, com o aviso de bruto × líquido). Sem filtro de tributo na tela de entrada (a árvore do detalhe o substitui)
 2. **Parlamentares**: alternância Câmara/Senado, busca + filtros (UF, partido, ordenação), KPIs,
    tabela ranqueada por gasto com mini-barra, paginação
-3. **Perfil do parlamentar**: cabeçalho, KPIs (cota usada × limite, notas, presença, proposições),
+3. **Perfil do parlamentar**: cabeçalho (com o botão "Ver leis de autoria dele(a)", que abre `/leis?autor=ID` já filtrada; só aparece com autoria votada), KPIs (cota usada × limite, notas, presença, proposições),
    gasto por categoria, gasto por mês, tabela de despesas com link "Ver nota"
 4. **Leis e votações**: abas (Todas, Com votos nominais, Viraram lei, Medidas provisórias, Aprovadas na Câmara, Aprovadas no Senado,
    Rejeitadas), cards com status, código, título, resumo, autor e placar em barra empilhada (ou "votação simbólica").
@@ -229,6 +229,12 @@ Regras:
    milhar; em "Viraram lei" o card aparece se QUALQUER das casas bater. O texto é o oficial: nem sempre traz o nome popular
    (a Emenda Constitucional 132/2023 está como "Altera o Sistema Tributário Nacional"). O teste compara o SQL com um
    cálculo independente em JS
+   **Filtro por autor** (parâmetro `autor` de `/api/leis` = id do `Parlamentar`, inteiro validado em `lib/leis-api.ts`;
+   campo "Autor (parlamentar)" com lista de sugestões vinda de `GET /api/leis/autores`, carregada no primeiro foco, cache de
+   1 dia): só entram parlamentares com autoria em proposição votada (autoria de comissão ou do Executivo não é parlamentar);
+   vale junto com aba, ano e busca de texto, e em "Viraram lei" o card aparece se QUALQUER casa do grupo casar com tudo.
+   Limite: o filtro só conhece parlamentares da legislatura atual (a tabela `Parlamentar`). Autorias de quem já saiu
+   (~870 de ~3.570, sem `parlamentarId`) só são achadas pela busca de texto, que procura no nome do autor
    **Medidas provisórias** (aba da tela 4): lista TODAS as MPV da legislatura atual (desde 2023), mesmo sem votação em plenário,
    vindas de `/proposicoes?siglaTipo=MPV` da Câmara. A vigência (início, fim, prorrogada) é lida do texto das tramitações
    "Abertura de Prazo" e "Prorrogação de Prazo" (nada é calculado por nós); MPV de crédito extraordinário leva um aviso no card.

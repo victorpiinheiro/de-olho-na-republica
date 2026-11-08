@@ -70,14 +70,21 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           </p>
           <span className="selo selo-solto">{p.ativo ? "Em exercício" : "Fora de exercício"}</span>
         </div>
-        <a
-          href={casa.pagina(p.idOrigem)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn btn-link"
-        >
-          {casa.botao}
-        </a>
+        <div className="perfil-acoes">
+          {leg.autorias > 0 && (
+            <Link href={`/leis?autor=${p.id}`} className="btn btn-link">
+              Ver leis de autoria dele(a)
+            </Link>
+          )}
+          <a
+            href={casa.pagina(p.idOrigem)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-link"
+          >
+            {casa.botao}
+          </a>
+        </div>
       </header>
 
       <div className="kpis kpis-4">

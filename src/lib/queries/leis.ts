@@ -117,6 +117,7 @@ export interface OpcoesLeis {
   limite?: number;
   ano?: number | null; // só as cuja votação mostrada no card (a nominal mais recente) foi nesse ano
   busca?: string | null; // texto digitado: cada palavra tem de aparecer no código, na norma, na ementa ou nos autores
+  autor?: number | null; // id do parlamentar: só proposições em que ele consta como autor (junto com a busca, as duas valem)
 }
 
 // Mesma normalização de lib/leis-api.ts (normalizarBusca), feita no banco: sem acento, minúscula, sem ponto de milhar.
@@ -148,14 +149,21 @@ export interface PaginaLeis {
 //
 // Votações no mesmo horário (comum no Senado) não têm ordem entre si na fonte: vale a de maior id, no banco e aqui
 // (as votações chegam ordenadas assim, e a ordenação do código é estável). Assim a aba e o selo do card sempre concordam.
-export async function listarLeis(aba: Aba, { offset = 0, limite = POR_ABA, ano = null, busca = null }: OpcoesLeis = {}): Promise<PaginaLeis> {
+export async function listarLeis(aba: Aba, { offset = 0, limite = POR_ABA, ano = null, busca = null, autor = null }: OpcoesLeis = {}): Promise<PaginaLeis> {
   // Busca: o registro "casa" se TODAS as palavras aparecem no texto dele. Em "Viraram lei" o grupo (Câmara + Senado da
   // mesma norma) aparece se QUALQUER registro dele casar, e o card mostra o grupo inteiro.
   const termos = busca ? termosDaBusca(busca) : [];
-  const casou =
+  const casouTexto =
     termos.length === 0
       ? Prisma.sql`TRUE`
       : Prisma.sql`(${Prisma.join(termos.map((t) => Prisma.sql`strpos(${normalizadoNoBanco(TEXTO_DA_PROPOSICAO)}, ${t}) > 0`), " AND ")})`;
+  // Autor: o registro casa se o parlamentar consta entre os autores dele. Em "Viraram lei" vale o mesmo critério do
+  // texto: o card aparece se QUALQUER registro do grupo (Câmara ou Senado) casar com TUDO o que foi pedido.
+  const casouAutor =
+    autor === null
+      ? Prisma.sql`TRUE`
+      : Prisma.sql`EXISTS (SELECT 1 FROM "Autor" fa WHERE fa."proposicaoId" = p.id AND fa."parlamentarId" = ${autor}::int)`;
+  const casou = Prisma.sql`(${casouTexto} AND ${casouAutor})`;
   const juntaAutores = termos.length === 0 ? Prisma.empty : JUNTA_AUTORES;
   const filtroAno = ano === null ? Prisma.sql`TRUE` : Prisma.sql`extract(year FROM destaque_data)::int = ${ano}::int`;
   const ehMp = aba === "medidas-provisorias";
@@ -393,4 +401,25 @@ export async function resumoLegislativo(parlamentarId: number, ano: number) {
     db.autor.count({ where: { parlamentarId } }),
   ]);
   return { nominais: { CAMARA: camara, SENADO: senado }, votou, autorias };
+}
+
+export interface AutorDeLei {
+  id: number;
+  nome: string;
+  partido: string;
+  uf: string;
+  casa: "CAMARA" | "SENADO";
+}
+
+// Parlamentares que constam como autores de alguma proposição que aparece em Leis (tem votação). Alimenta o filtro por
+// autor da tela. Autoria de órgão (comissão, Executivo) não entra: não é parlamentar. Pode incluir quem já saiu do cargo.
+export async function listarAutoresDeLeis(): Promise<AutorDeLei[]> {
+  return db.$queryRaw<AutorDeLei[]>`
+    SELECT pa.id, pa.nome, pa.partido, pa.uf::text AS uf, pa.casa::text AS casa
+    FROM "Parlamentar" pa
+    WHERE EXISTS (
+      SELECT 1 FROM "Autor" a JOIN "Votacao" v ON v."proposicaoId" = a."proposicaoId"
+      WHERE a."parlamentarId" = pa.id
+    )
+    ORDER BY pa.nome ASC, pa.id ASC`;
 }

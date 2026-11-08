@@ -12,6 +12,7 @@ export interface ParametrosLeis {
   pagina: number; // 0 = primeira
   ano: number | null;
   busca: string | null; // texto digitado (já limpo); null = sem busca
+  autor: number | null; // id do parlamentar (tabela Parlamentar) que assina a proposição; null = qualquer autor
 }
 
 // Para comparar sem se importar com acento, maiúscula ou ponto de milhar ("14.597" = "14597"). O banco faz a mesma
@@ -45,5 +46,12 @@ export function lerParametrosLeis(p: URLSearchParams): ResultadoParametros {
     if (!/^\d{4}$/.test(textoAno) || Number(textoAno) < 2000 || Number(textoAno) > 2100) return { ok: false, motivo: "ano inválido" };
     ano = Number(textoAno);
   }
-  return { ok: true, valor: { aba: aba.chave, pagina: Number(textoPagina), ano, busca: busca === "" ? null : busca } };
+
+  const textoAutor = p.get("autor");
+  let autor: number | null = null;
+  if (textoAutor !== null && textoAutor !== "") {
+    if (!/^\d{1,9}$/.test(textoAutor) || Number(textoAutor) < 1) return { ok: false, motivo: "autor inválido" };
+    autor = Number(textoAutor);
+  }
+  return { ok: true, valor: { aba: aba.chave, pagina: Number(textoPagina), ano, busca: busca === "" ? null : busca, autor } };
 }
