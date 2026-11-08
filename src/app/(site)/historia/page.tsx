@@ -2,6 +2,12 @@ import { PainelHistoria } from "@/components/PainelHistoria";
 import { listarPresidentes } from "@/lib/queries/historia";
 
 // Carga única: a página é estática.
+export const metadata = {
+  title: "História do país",
+  description:
+    "Linha do tempo dos presidentes da República desde 1889, por período, com dados estruturados do Wikidata.",
+};
+
 export const revalidate = false;
 
 export default async function Page() {

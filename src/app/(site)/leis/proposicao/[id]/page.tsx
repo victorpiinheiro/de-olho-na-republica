@@ -1,10 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LinhaDoTempo } from "@/components/LinhaDoTempo";
 import { StatusLei } from "@/components/StatusLei";
 import { VotosDaProposicao } from "@/components/VotosDaProposicao";
+import { db } from "@/lib/db";
 import { dataBrDia } from "@/lib/format";
-import { pecEmAndamento, rotuloOrgao, statusDe } from "@/lib/leis";
+import { codigo, pecEmAndamento, rotuloOrgao, statusDe } from "@/lib/leis";
+import { cortar } from "@/lib/site";
 import { buscarLei } from "@/lib/queries/leis";
 
 export const revalidate = 3600;
@@ -12,6 +15,14 @@ export const revalidate = 3600;
 // Sem pré-render no build: cada proposição é gerada na primeira visita e depois revalidada.
 export function generateStaticParams() {
   return [];
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  if (!/^\d+$/.test(id)) return {};
+  const p = await db.proposicao.findUnique({ where: { id: Number(id) }, select: { siglaTipo: true, numero: true, ano: true, ementa: true } });
+  if (!p) return {};
+  return { title: `${codigo(p)}: ${cortar(p.ementa, 70)}`, description: cortar(p.ementa, 160) };
 }
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {

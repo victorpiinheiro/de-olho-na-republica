@@ -2,6 +2,12 @@ import { PainelImpostometro } from "@/components/PainelImpostometro";
 import { carregarImpostometro } from "@/lib/queries/impostometro";
 
 // O contador anda no navegador; o servidor só entrega a base oficial.
+export const metadata = {
+  title: "Impostômetro",
+  description:
+    "Estimativa em tempo real da arrecadação de tributos no Brasil em 2026, federal e estadual, com dados oficiais da Receita Federal e do Tesouro (Siconfi).",
+};
+
 export const revalidate = 86400;
 
 const PASSOS = [

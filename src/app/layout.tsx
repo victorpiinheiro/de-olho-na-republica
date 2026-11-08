@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans } from "next/font/google";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const plex = IBM_Plex_Sans({
@@ -8,10 +9,16 @@ const plex = IBM_Plex_Sans({
   weight: ["400", "500", "600", "700"],
 });
 
+const DESCRICAO =
+  "Transparência política com dados oficiais: impostômetro, parlamentares, leis e votações e eleições 2026.";
+
 export const metadata: Metadata = {
-  title: "De Olho na República",
-  description:
-    "Transparência política com dados oficiais: impostômetro, parlamentares, leis e votações e eleições 2026.",
+  metadataBase: new URL(SITE_URL),
+  title: { default: "De Olho na República", template: "%s · De Olho na República" },
+  description: DESCRICAO,
+  // "./" = o endereço da própria página, sem parâmetros (ex.: /leis?autor=1 conta como /leis).
+  alternates: { canonical: "./" },
+  openGraph: { siteName: "De Olho na República", locale: "pt_BR", type: "website", description: DESCRICAO },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

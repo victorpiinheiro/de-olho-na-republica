@@ -2,6 +2,12 @@ import { PainelOrcamento } from "@/components/PainelOrcamento";
 import { carregarOrcamento } from "@/lib/queries/orcamento";
 
 // Atualiza com o RREO, que sai a cada bimestre.
+export const metadata = {
+  title: "Orçamento da União",
+  description:
+    "Despesa da União por função de governo, executada no ano, com as subfunções. Dados do Tesouro Nacional (Siconfi).",
+};
+
 export const revalidate = 86400;
 
 export default async function Page() {

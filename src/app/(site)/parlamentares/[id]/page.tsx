@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { Avatar } from "@/components/Avatar";
 import { Barra } from "@/components/Barra";
 import { GraficoMensal } from "@/components/GraficoMensal";
 import { Kpi } from "@/components/Kpi";
 import { TabelaDespesas } from "@/components/TabelaDespesas";
+import { db } from "@/lib/db";
 import { brl, inteiro, rotuloCategoria } from "@/lib/format";
 import { resumoLegislativo } from "@/lib/queries/leis";
 import { buscarPerfil } from "@/lib/queries/parlamentares";
@@ -30,6 +32,18 @@ export const revalidate = 86400;
 // Sem pré-render no build: cada perfil é gerado na primeira visita e depois revalidado.
 export function generateStaticParams() {
   return [];
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  if (!/^\d+$/.test(id)) return {};
+  const p = await db.parlamentar.findUnique({ where: { id: Number(id) }, select: { nome: true, partido: true, uf: true, casa: true } });
+  if (!p) return {};
+  const cargo = PERFIL[p.casa].cargo.toLowerCase();
+  return {
+    title: `${p.nome} (${p.partido}-${p.uf})`,
+    description: `Gastos da cota parlamentar, notas fiscais, presença em votações e proposições de ${p.nome}, ${cargo} (${p.partido}-${p.uf}). Dados oficiais.`,
+  };
 }
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
