@@ -273,7 +273,7 @@ Regras:
    8 Creative Commons); a foto só entra com licença conhecida e sem restrição declarada; o crédito (autor ou
    "autor desconhecido", licença e link do Commons) fica sempre visível no cartão; a classificação de licença é a do
    Commons, não conferência nossa; imagens via `next/image` (só `thumb.wikimedia.org` e `upload.wikimedia.org`)
-9. **Operação** (pronta e no ar em https://de-olho-na-republica.vercel.app; segredos cadastrados; falta provar o agendamento automático do GitHub): workflows em `.github/workflows` (votacoes, diario, semanal, fiscal, carga-unica), `POST /api/revalidate` com lista fixa de caminhos, alerta de falha por issue do GitHub, job `tamanho-banco` (falha acima de 400 MB). Passo a passo em `docs/OPERACAO.md`
+9. **Operação** (pronta e no ar em https://www.deolhonarepublica.com.br (domínio próprio, DNS no Registro.br; o .vercel.app continua respondendo); segredos cadastrados; falta provar o agendamento automático do GitHub): workflows em `.github/workflows` (votacoes, diario, semanal, fiscal, carga-unica), `POST /api/revalidate` com lista fixa de caminhos, alerta de falha por issue do GitHub, job `tamanho-banco` (falha acima de 400 MB). Passo a passo em `docs/OPERACAO.md`
 
 ## Como trabalhar comigo
 - Antes de codar uma etapa, mostre o plano (arquivos, modelos, decisões) e espere meu ok.
