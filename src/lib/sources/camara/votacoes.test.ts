@@ -153,6 +153,29 @@ describe("toProposicao", () => {
     expect(toProposicao(proposicaoSchema.parse(tramitando)).virouLei).toBe(false);
   });
 
+  it("guarda o órgão e a data da última movimentação (status atual da Câmara)", () => {
+    // Valores da PEC 32/2015, copiados da API real em 08/11/2026.
+    const r = toProposicao(
+      proposicaoSchema.parse({
+        ...base,
+        statusProposicao: {
+          codSituacao: 915,
+          descricaoSituacao: "Aguardando Parecer",
+          siglaOrgao: "PEC03215",
+          dataHora: "2026-11-04T18:20",
+        },
+      }),
+    );
+    expect(r.orgaoAtual).toBe("PEC03215");
+    expect(r.dataUltimaTramitacao?.toISOString().slice(0, 10)).toBe("2026-11-04");
+  });
+
+  it("sem órgão e sem data (a API omite) ficam nulos, e não quebram a validação", () => {
+    const r = toProposicao(proposicaoSchema.parse(base));
+    expect(r.orgaoAtual).toBeNull();
+    expect(r.dataUltimaTramitacao).toBeNull();
+  });
+
   it("aceita situação nula (a API devolve nulo em alguns casos)", () => {
     const r = toProposicao(
       proposicaoSchema.parse({ ...base, statusProposicao: { codSituacao: null, descricaoSituacao: null } }),

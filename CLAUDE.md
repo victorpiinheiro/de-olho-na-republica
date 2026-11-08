@@ -100,6 +100,7 @@ O front NUNCA chama APIs do governo diretamente: lê do nosso banco.
 | Votações (Câmara e Senado, janela de 2 dias) | de hora em hora, 8h–20h de Brasília, dias úteis |
 | Proposições (situação e data da lei) | 1x/dia (reconsulta todas as pendentes, ~6 min) |
 | Medidas provisórias (Câmara, legislatura atual, com vigência) | 1x/dia (`sync-medidas-provisorias`, no workflow `diario`; só rebusca as que não estão encerradas) |
+| PECs em andamento (Câmara) | 1x/dia (`sync-pecs`, no `diario`: só as com tramitação nos últimos 60 dias, que pega toda mudança de situação) e 1x/semana com `--completo` (workflow `semanal`: varre todas desde 1988, ~2,5 mil chamadas) |
 | Despesas (Câmara e Senado) | 1x/dia (3h de Brasília) |
 | Lista de parlamentares | 1x/semana |
 | Tamanho do banco | 1x/semana |
@@ -215,7 +216,7 @@ Regras:
    tabela ranqueada por gasto com mini-barra, paginação
 3. **Perfil do parlamentar**: cabeçalho (com o botão "Ver leis de autoria dele(a)", que abre `/leis?autor=ID` já filtrada; só aparece com autoria votada), KPIs (cota usada × limite, notas, presença, proposições),
    gasto por categoria, gasto por mês, tabela de despesas com link "Ver nota"
-4. **Leis e votações**: abas (Todas, Com votos nominais, Viraram lei, Medidas provisórias, Aprovadas na Câmara, Aprovadas no Senado,
+4. **Leis e votações**: abas (Todas, Com votos nominais, Viraram lei, Medidas provisórias, PECs em andamento, Aprovadas na Câmara, Aprovadas no Senado,
    Rejeitadas), cards com status, código, título, resumo, autor e placar em barra empilhada (ou "votação simbólica").
    A página (estática, 1 h) traz os 100 primeiros de cada aba; **"Carregar mais"** (100 por vez) e o **filtro por ano da
    votação mostrada** buscam o resto do banco em `GET /api/leis?aba=&pagina=&ano=` (parâmetros validados em
@@ -239,6 +240,17 @@ Regras:
    vindas de `/proposicoes?siglaTipo=MPV` da Câmara. A vigência (início, fim, prorrogada) é lida do texto das tramitações
    "Abertura de Prazo" e "Prorrogação de Prazo" (nada é calculado por nós); MPV de crédito extraordinário leva um aviso no card.
    O mesmo número na Câmara e no Senado sai num card só. A API do Senado `materia/pesquisa` está descontinuada desde 02/2026
+   **PECs em andamento** (aba da tela 4): PECs da Câmara que ainda tramitam, de QUALQUER ano de apresentação (desde 1988),
+   mesmo sem votação em plenário (a PEC 32/2015, da maioridade penal, só teve votação em comissão). "Em andamento" = a
+   situação oficial NÃO está em `SITUACOES_ENCERRADAS` (`lib/leis.ts`: arquivada, enviada ao arquivo, virou norma, retirada,
+   recusada etc.); PEC parada anos esperando parecer continua em andamento. Só PEC em andamento é gravada (com autores);
+   encerrada fica fora do banco, salvo se já estava (foi a plenário). PEC SEM situação na fonte também fica de fora (~520
+   PECs antigas, de 1988 em diante, vêm assim; os despachos dizem "arquivada" ou "prejudicada"). O card mostra situação oficial, órgão atual
+   (`orgaoAtual`; "PEC03215" vira "Comissão especial (PEC03215)") e `dataUltimaTramitacao`, e é ordenado por ela; o detalhe traz
+   link para a ficha de tramitação na Câmara (o banco NÃO guarda tramitações). Votações de comissão não entram. Só a Câmara
+   (a API do Senado está descontinuada). A API da Câmara IGNORA o filtro `codSituacao` e limita a janela de tramitação a 3
+   meses: por isso a carga é por ano de apresentação (`listarPecsDoAno`) e a situação vem do detalhe de cada PEC. O KPI
+   "Autorias votadas" do perfil conta só autoria de proposição com votação (a PEC sem votação não entra nele)
 5. **Detalhe da lei**: resumo, ementa oficial, linha do tempo da tramitação, resultado, autoria,
    tabela de voto por partido, grade de votos nominais filtrável
 6. **Eleições**: filtros de cargo e UF, KPIs de comparecimento 1º → 2º turno, finalistas com barras

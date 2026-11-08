@@ -1,4 +1,4 @@
-name: Semanal (parlamentares e tamanho do banco)
+name: Semanal (parlamentares, PECs e tamanho do banco)
 
 # Domingo às 4h41 de Brasília (7h41 UTC). Minuto fora de 0 de propósito (ver votacoes.yml).
 on:
@@ -17,7 +17,7 @@ concurrency:
 jobs:
   semanal:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       SITE_URL: ${{ secrets.SITE_URL }}
@@ -30,12 +30,15 @@ jobs:
       - name: Senadores
         if: ${{ !cancelled() }}
         run: npx tsx --tsconfig tsconfig.json src/jobs/sync-senadores.ts
+      - name: PECs em andamento (varredura completa desde 1988)
+        if: ${{ !cancelled() }}
+        run: npx tsx --tsconfig tsconfig.json src/jobs/sync-pecs.ts --completo
       - name: Tamanho do banco (falha acima de 400 MB)
         if: ${{ !cancelled() }}
         run: npx tsx --tsconfig tsconfig.json src/jobs/tamanho-banco.ts
       - name: Atualizar páginas
         if: ${{ success() }}
-        run: npx tsx --tsconfig tsconfig.json src/jobs/revalidar.ts '/parlamentares' '/parlamentares/senado' '/parlamentares/[id]'
+        run: npx tsx --tsconfig tsconfig.json src/jobs/revalidar.ts '/leis' '/leis/[aba]' '/parlamentares' '/parlamentares/senado' '/parlamentares/[id]'
       - name: Alerta de falha
         if: ${{ failure() }}
         uses: ./.github/actions/alerta-falha

@@ -38,6 +38,9 @@ jobs:
       - name: Medidas provisórias
         if: ${{ !cancelled() }}
         run: npx tsx --tsconfig tsconfig.json src/jobs/sync-medidas-provisorias.ts
+      - name: PECs em andamento (as abertas e as com tramitação recente)
+        if: ${{ !cancelled() }}
+        run: npx tsx --tsconfig tsconfig.json src/jobs/sync-pecs.ts
       - name: Proposições do Senado
         if: ${{ !cancelled() }}
         run: npx tsx --tsconfig tsconfig.json src/jobs/sync-proposicoes-senado.ts

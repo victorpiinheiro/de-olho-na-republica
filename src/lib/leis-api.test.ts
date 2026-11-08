@@ -15,7 +15,7 @@ describe("lerParametrosLeis", () => {
   });
 
   it("aceita todas as abas da tela", () => {
-    for (const aba of ["todas", "nominais", "viraram-lei", "aprovadas-camara", "aprovadas-senado", "rejeitadas"]) {
+    for (const aba of ["todas", "nominais", "viraram-lei", "medidas-provisorias", "pecs", "aprovadas-camara", "aprovadas-senado", "rejeitadas"]) {
       expect(ler(`aba=${aba}`).ok, aba).toBe(true);
     }
   });

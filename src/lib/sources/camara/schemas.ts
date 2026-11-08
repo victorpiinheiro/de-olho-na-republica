@@ -102,6 +102,8 @@ export const proposicaoSchema = z.object({
   statusProposicao: z.object({
     codSituacao: z.number().int().nullable(),
     descricaoSituacao: z.string().nullable(),
+    siglaOrgao: z.string().nullish(), // onde a proposição está agora (comissão, Plenário...)
+    dataHora: z.string().nullish(), // quando o status mudou: a última movimentação
   }),
 });
 export type ProposicaoApi = z.infer<typeof proposicaoSchema>;
@@ -123,6 +125,14 @@ export const tramitacaoSchema = z.object({
   despacho: z.string().nullish(),
 });
 export type TramitacaoApi = z.infer<typeof tramitacaoSchema>;
+
+// GET /proposicoes?siglaTipo=PEC&ano=... (lista). Só o id interessa: a situação vem de /proposicoes/{id}.
+export const pecListaSchema = z.object({
+  id: z.number().int(),
+  siglaTipo: z.literal("PEC"),
+  numero: z.number().int(),
+  ano: z.number().int(),
+});
 
 // GET /proposicoes?siglaTipo=MPV&ano=... (lista). Só o id interessa: o detalhe vem de /proposicoes/{id}.
 export const proposicaoListaSchema = z.object({

@@ -8,6 +8,7 @@ import {
   deputadoSchema,
   despesaCsvSchema,
   orientacaoSchema,
+  pecListaSchema,
   proposicaoListaSchema,
   proposicaoSchema,
   tramitacaoSchema,
@@ -53,6 +54,19 @@ export const buscarProposicao = (id: number) => fetchOne(`${BASE}/proposicoes/${
 // Todas as medidas provisórias apresentadas no ano.
 export const listarMedidasProvisorias = (ano: number) =>
   fetchAllPages(`${BASE}/proposicoes?siglaTipo=MPV&ano=${ano}&itens=100&ordem=ASC&ordenarPor=id`, proposicaoListaSchema);
+
+// Todas as PECs apresentadas no ano. O filtro por situação (codSituacao) é ignorado pela API (conferido: códigos
+// diferentes devolvem a mesma lista), e a janela de datas de tramitação aceita no máximo 3 meses; por isso a varredura
+// completa é por ano de apresentação, e a situação de cada uma vem do detalhe.
+export const listarPecsDoAno = (ano: number) =>
+  fetchAllPages(`${BASE}/proposicoes?siglaTipo=PEC&ano=${ano}&itens=100&ordem=ASC&ordenarPor=id`, pecListaSchema);
+
+// PECs com tramitação no período (YYYY-MM-DD; no máximo 3 meses entre as datas), de qualquer ano de apresentação.
+export const listarPecsComMovimento = (dataInicio: string, dataFim: string) =>
+  fetchAllPages(
+    `${BASE}/proposicoes?siglaTipo=PEC&dataInicio=${dataInicio}&dataFim=${dataFim}&itens=100&ordem=ASC&ordenarPor=id`,
+    pecListaSchema,
+  );
 
 export const listarAutores = (id: number) =>
   fetchAllPages(`${BASE}/proposicoes/${id}/autores`, autorSchema);

@@ -52,7 +52,7 @@ export function ListaFiltravelLeis({ aba, inicial }: { aba: Aba; inicial: Pagina
   const pedido = useRef(0); // ignora respostas de pedidos antigos (ex.: digitou outra coisa enquanto carregava)
   const atraso = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const substantivo = aba === "viraram-lei" ? ["lei", "leis"] : ["proposição", "proposições"];
+  const substantivo = aba === "viraram-lei" ? ["lei", "leis"] : aba === "pecs" ? ["PEC", "PECs"] : ["proposição", "proposições"];
 
   // undefined = resposta obsoleta (já há um pedido mais novo: não mexe em nada); null = erro; objeto = deu certo.
   async function buscarNoServidor(pagina: number, ano: number | null, q: string, autor: AutorDeLei | null): Promise<{ cards: Card[]; total: number } | null | undefined> {
@@ -209,7 +209,7 @@ export function ListaFiltravelLeis({ aba, inicial }: { aba: Aba; inicial: Pagina
           </datalist>
         </label>
         <label>
-          Ano da votação
+          {aba === "pecs" ? "Ano da última movimentação" : "Ano da votação"}
           <select value={escolhido ?? ""} onChange={(e) => mudarAno(e.target.value === "" ? null : Number(e.target.value))}>
             <option value="">Todos os anos</option>
             {inicial.anos.map((a) => (

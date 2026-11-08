@@ -3,9 +3,12 @@ import {
   autoriaTexto,
   codigo,
   estadoDe,
+  pecEmAndamento,
   pertenceAba,
   placar,
+  rotuloOrgao,
   rotuloResultado,
+  SITUACOES_ENCERRADAS,
   statusDe,
   votacaoDestaque,
   type VotacaoResumo,
@@ -214,5 +217,70 @@ describe("autoriaTexto", () => {
   });
   it("Executivo fica só com o nome", () => {
     expect(autoriaTexto({ nome: "Poder Executivo", tipo: "Órgão do Poder Executivo" }, 0)).toBe("Poder Executivo");
+  });
+});
+
+describe("PEC em andamento", () => {
+  const pec = (situacao: string | null, extra: { casa?: "CAMARA" | "SENADO"; siglaTipo?: string } = {}) => ({
+    casa: extra.casa ?? ("CAMARA" as const),
+    siglaTipo: extra.siglaTipo ?? "PEC",
+    situacao,
+  });
+
+  it("vale para PEC da Câmara com qualquer situação que não seja de encerramento", () => {
+    // A PEC 32/2015 está "Aguardando Parecer", sem nunca ter ido a plenário.
+    expect(pecEmAndamento(pec("Aguardando Parecer"))).toBe(true);
+    expect(pecEmAndamento(pec("Aguardando Apreciação pelo Senado Federal"))).toBe(true);
+    expect(pecEmAndamento(pec("Pronta para Pauta"))).toBe(true);
+    expect(pecEmAndamento(pec("Tramitando em Conjunto"))).toBe(true);
+  });
+
+  it("não vale para PEC arquivada, que virou norma, foi retirada ou recusada", () => {
+    for (const s of ["Arquivada", "Enviada ao Arquivo", "Transformado em Norma Jurídica", "Retirado pelo(a) Autor(a)", "Recusado"]) {
+      expect(pecEmAndamento(pec(s)), s).toBe(false);
+    }
+  });
+
+  it("ignora espaço sobrando no texto da situação (a Câmara manda alguns com espaço no fim)", () => {
+    expect(pecEmAndamento(pec("Aguardando Despacho de Arquivamento "))).toBe(false);
+    expect(pecEmAndamento(pec("Aguardando Parecer "))).toBe(true);
+  });
+
+  it("sem situação informada não dá para saber: fica de fora", () => {
+    expect(pecEmAndamento(pec(null))).toBe(false);
+  });
+
+  it("não vale para outro tipo nem para o Senado", () => {
+    expect(pecEmAndamento(pec("Aguardando Parecer", { siglaTipo: "PL" }))).toBe(false);
+    expect(pecEmAndamento(pec("Aguardando Parecer", { siglaTipo: "MPV" }))).toBe(false);
+    expect(pecEmAndamento(pec("Aguardando Parecer", { casa: "SENADO" }))).toBe(false);
+  });
+
+  it("a lista de situações encerradas não tem repetição nem espaço sobrando", () => {
+    expect(new Set(SITUACOES_ENCERRADAS).size).toBe(SITUACOES_ENCERRADAS.length);
+    for (const s of SITUACOES_ENCERRADAS) expect(s).toBe(s.trim());
+  });
+
+  it("pertenceAba('pecs') usa a mesma regra, com ou sem votação em plenário", () => {
+    const base = { virouLei: false, votacoes: [] as VotacaoResumo[] };
+    expect(pertenceAba({ ...base, ...pec("Aguardando Parecer") }, "pecs")).toBe(true);
+    expect(pertenceAba({ ...base, votacoes: [v(1)], ...pec("Aguardando Parecer") }, "pecs")).toBe(true);
+    expect(pertenceAba({ ...base, ...pec("Arquivada") }, "pecs")).toBe(false);
+    expect(pertenceAba({ ...base, ...pec("Aguardando Parecer", { siglaTipo: "PL" }) }, "pecs")).toBe(false);
+  });
+
+  it("o selo do card de uma PEC sem votação é a situação oficial", () => {
+    const r = statusDe({ virouLei: false, votacoes: [], ...pec("Aguardando Parecer") });
+    expect(r).toEqual({ rotulo: "Aguardando Parecer", tom: "neutro" });
+  });
+});
+
+describe("rotuloOrgao", () => {
+  it("a comissão especial de uma PEC vem com o número da PEC", () => {
+    expect(rotuloOrgao("PEC03215")).toBe("Comissão especial (PEC03215)");
+  });
+  it("traduz o plenário e deixa o resto como a Câmara escreve", () => {
+    expect(rotuloOrgao("PLEN")).toBe("Plenário");
+    expect(rotuloOrgao("CCJC")).toBe("CCJC");
   });
 });

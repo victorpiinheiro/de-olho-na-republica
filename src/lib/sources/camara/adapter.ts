@@ -97,6 +97,8 @@ export function toProposicao(p: ProposicaoApi) {
     situacao: p.statusProposicao.descricaoSituacao,
     virouLei: p.statusProposicao.codSituacao === SITUACAO_NORMA_JURIDICA,
     dataApresentacao: p.dataApresentacao ? parseData(p.dataApresentacao) : null,
+    orgaoAtual: p.statusProposicao.siglaOrgao?.trim() || null,
+    dataUltimaTramitacao: p.statusProposicao.dataHora ? parseData(p.statusProposicao.dataHora) : null,
   };
 }
 

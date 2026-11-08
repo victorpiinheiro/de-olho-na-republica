@@ -1,4 +1,4 @@
-export type Aba = "todas" | "nominais" | "viraram-lei" | "medidas-provisorias" | "aprovadas-camara" | "aprovadas-senado" | "rejeitadas";
+export type Aba = "todas" | "nominais" | "viraram-lei" | "medidas-provisorias" | "pecs" | "aprovadas-camara" | "aprovadas-senado" | "rejeitadas";
 
 export interface InfoAba {
   chave: Aba;
@@ -50,6 +50,16 @@ export const ABAS: InfoAba[] = [
     },
   },
   {
+    chave: "pecs",
+    rotulo: "PECs em andamento",
+    href: "/leis/pecs",
+    explicacao: {
+      titulo: "O que são PECs em andamento",
+      texto:
+        "Proposta de Emenda à Constituição: muda o texto da Constituição e exige três quintos dos votos, em dois turnos, em cada casa. Aqui entram as PECs da Câmara que ainda tramitam, de qualquer ano de apresentação, mesmo as que nunca foram a plenário. O card mostra a situação oficial, o órgão onde ela está e a data da última movimentação. Votações em comissão (requerimentos, parecer) não aparecem; a ficha completa fica na Câmara. As PECs do Senado não entram.",
+    },
+  },
+  {
     chave: "aprovadas-camara",
     rotulo: "Aprovadas na Câmara",
     href: "/leis/aprovadas-camara",
@@ -89,6 +99,39 @@ export const SITUACOES_APROVADA_CAMARA = [
   "Enviada ao Senado Federal",
 ];
 export const SITUACAO_ARQUIVADA = "Arquivada";
+
+// Situações oficiais (referencias/situacoesProposicao da Câmara) em que a proposição não tramita mais: arquivada,
+// virou norma, foi retirada ou recusada. Tudo o que não está aqui conta como "em andamento", inclusive a que está
+// parada à espera de parecer há anos (ela pode voltar à pauta, como a PEC 32/2015).
+export const SITUACOES_ENCERRADAS = [
+  "Arquivada",
+  "Enviada ao Arquivo",
+  "Aguardando Remessa ao Arquivo",
+  "Aguardando Originais para Envio ao Arquivo",
+  "Aguardando Despacho de Arquivamento",
+  "Transformado em Norma Jurídica",
+  "Transformado em nova proposição",
+  "Retirado pelo(a) Autor(a)",
+  "Devolvida ao(à) Autor(a)",
+  "Recusado",
+  "Prejudicialidade",
+  "Perdeu a Eficácia",
+  "Tramitação Finalizada",
+  "Desmembrada",
+  "Inativa Sinopse (Carga Jan/2001)",
+];
+
+// Sigla do órgão como a Câmara a escreve → texto para o leitor. A comissão especial de uma PEC tem como sigla o
+// próprio número da PEC ("PEC03215"), que sozinho não diz nada.
+export function rotuloOrgao(sigla: string): string {
+  if (/^PEC\d+$/i.test(sigla)) return `Comissão especial (${sigla.toUpperCase()})`;
+  if (sigla === "PLEN") return "Plenário";
+  return sigla;
+}
+
+// PEC da Câmara que ainda tramita. Sem situação informada não dá para saber: fica de fora.
+export const pecEmAndamento = (p: { casa: CasaLegislativa; siglaTipo: string; situacao: string | null }) =>
+  p.casa === "CAMARA" && p.siglaTipo === "PEC" && p.situacao !== null && !SITUACOES_ENCERRADAS.includes(p.situacao.trim());
 
 export type EstadoVotacao = "nominal" | "simbolica" | "secreta";
 
@@ -151,6 +194,8 @@ export function pertenceAba(p: PropAba, aba: Aba): boolean {
       return p.virouLei;
     case "medidas-provisorias":
       return p.siglaTipo === "MPV";
+    case "pecs":
+      return pecEmAndamento({ casa: p.casa, siglaTipo: p.siglaTipo ?? "", situacao: p.situacao });
     case "aprovadas-camara":
       return (
         p.casa === "CAMARA" &&

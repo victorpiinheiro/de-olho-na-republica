@@ -4,7 +4,7 @@ import { LinhaDoTempo } from "@/components/LinhaDoTempo";
 import { StatusLei } from "@/components/StatusLei";
 import { VotosDaProposicao } from "@/components/VotosDaProposicao";
 import { dataBrDia } from "@/lib/format";
-import { statusDe } from "@/lib/leis";
+import { pecEmAndamento, rotuloOrgao, statusDe } from "@/lib/leis";
 import { buscarLei } from "@/lib/queries/leis";
 
 export const revalidate = 3600;
@@ -54,6 +54,20 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           <p className="lei-fonte">
             Prazo da medida provisória no Congresso: até {dataBrDia(p.vigenciaFimIso)}
             {p.prorrogada ? " (já prorrogado por mais 60 dias)" : " (pode ser prorrogado uma vez por mais 60 dias)"}.
+          </p>
+        )}
+        {pecEmAndamento(p) && (
+          <p className="lei-fonte">
+            {p.orgaoAtual && <>Onde está: <strong>{rotuloOrgao(p.orgaoAtual)}</strong>. </>}
+            {p.ultimaMovimentacaoIso && <>Última movimentação em {dataBrDia(p.ultimaMovimentacaoIso)}. </>}
+            <a
+              href={`https://www.camara.leg.br/proposicoesWeb/fichadetramitacao?idProposicao=${p.idOrigem}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="link-forte"
+            >
+              Ver a tramitação completa na Câmara ↗
+            </a>
           </p>
         )}
         <p className="lei-fonte">

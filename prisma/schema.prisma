@@ -92,6 +92,9 @@ model Proposicao {
   vigenciaInicio   DateTime? @db.Date
   vigenciaFim      DateTime? @db.Date
   prorrogada       Boolean   @default(false)
+  // Onde a proposição está hoje e quando teve a última movimentação (status oficial da Câmara). Alimenta a aba de PECs.
+  orgaoAtual           String?
+  dataUltimaTramitacao DateTime? @db.Date
   atualizadoEm     DateTime  @updatedAt
 
   autores  Autor[]

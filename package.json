@@ -14,6 +14,7 @@
     "sync:despesas": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-despesas.ts",
     "sync:votacoes": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-votacoes.ts",
     "sync:medidas-provisorias": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-medidas-provisorias.ts",
+    "sync:pecs": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-pecs.ts",
     "sync:proposicoes": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-proposicoes.ts",
     "sync:senadores": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-senadores.ts",
     "sync:ceaps": "tsx --env-file=.env --tsconfig tsconfig.json src/jobs/sync-ceaps.ts",

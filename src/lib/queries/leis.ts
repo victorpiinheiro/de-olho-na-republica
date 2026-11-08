@@ -6,6 +6,7 @@ import {
   autoriaTexto,
   SITUACAO_ARQUIVADA,
   SITUACOES_APROVADA_CAMARA,
+  SITUACOES_ENCERRADAS,
   statusDe,
   votacaoDestaque,
   type Aba,
@@ -42,6 +43,8 @@ export interface CardLei {
   tambem: OutraCasa[];
   // Só medida provisória: prazo no Congresso e data em que chegou.
   mp: { vigenciaFimIso: string | null; prorrogada: boolean; apresentadaIso: string | null; creditoExtraordinario: boolean } | null;
+  // Só PEC em andamento: onde está agora e quando teve a última movimentação (status oficial da Câmara).
+  pec: { orgaoAtual: string | null; ultimaMovimentacaoIso: string | null } | null;
   destaque: {
     dataIso: string;
     descricao: string;
@@ -66,6 +69,9 @@ function condicaoDaAba(aba: Aba): Prisma.Sql {
       return Prisma.sql`p."virouLei"`;
     case "medidas-provisorias":
       return Prisma.sql`p."siglaTipo" = 'MPV'`;
+    case "pecs":
+      return Prisma.sql`(p.casa = 'CAMARA' AND p."siglaTipo" = 'PEC' AND p.situacao IS NOT NULL
+        AND btrim(p.situacao) <> ALL(${SITUACOES_ENCERRADAS}::text[]))`;
     case "aprovadas-camara":
       return Prisma.sql`(p.casa = 'CAMARA' AND NOT p."virouLei" AND p.situacao = ANY(${SITUACOES_APROVADA_CAMARA}::text[]))`;
     case "aprovadas-senado":
@@ -107,6 +113,8 @@ interface LinhaLei {
   anos: number[];
   vigenciaFim: Date | null;
   prorrogada: boolean;
+  orgaoAtual: string | null;
+  dataUltimaTramitacao: Date | null;
   dataApresentacao: Date | null;
   tambem: OutraCasa[] | null;
   votacoes: (Omit<VotacaoResumo, "data"> & { data: string })[];
@@ -167,14 +175,20 @@ export async function listarLeis(aba: Aba, { offset = 0, limite = POR_ABA, ano =
   const juntaAutores = termos.length === 0 ? Prisma.empty : JUNTA_AUTORES;
   const filtroAno = ano === null ? Prisma.sql`TRUE` : Prisma.sql`extract(year FROM destaque_data)::int = ${ano}::int`;
   const ehMp = aba === "medidas-provisorias";
-  // Medida provisória pode nunca ter ido a plenário: sem votação, vale a data de apresentação.
-  const juntaVotos = ehMp ? Prisma.sql`LEFT JOIN v ON v.pid = p.id` : Prisma.sql`JOIN v ON v.pid = p.id`;
+  const ehPec = aba === "pecs";
+  // Medida provisória e PEC podem nunca ter ido a plenário: sem votação, vale a data de apresentação (MPV) ou a da
+  // última movimentação (PEC, que fica parada anos e volta: a que andou há pouco vem primeiro).
+  const juntaVotos = ehMp || ehPec ? Prisma.sql`LEFT JOIN v ON v.pid = p.id` : Prisma.sql`JOIN v ON v.pid = p.id`;
   const dataOrdem = ehMp
     ? Prisma.sql`COALESCE(p."dataApresentacao"::timestamp, v.ultima_data)`
-    : Prisma.sql`v.ultima_data`;
+    : ehPec
+      ? Prisma.sql`COALESCE(p."dataUltimaTramitacao"::timestamp, v.ultima_data, p."dataApresentacao"::timestamp)`
+      : Prisma.sql`v.ultima_data`;
   const dataDestaque = ehMp
     ? Prisma.sql`COALESCE(p."dataApresentacao"::timestamp, v.destaque_data)`
-    : Prisma.sql`v.destaque_data`;
+    : ehPec
+      ? Prisma.sql`COALESCE(p."dataUltimaTramitacao"::timestamp, v.destaque_data, p."dataApresentacao"::timestamp)`
+      : Prisma.sql`v.destaque_data`;
   const preferirCamara = ehMp ? Prisma.sql`(casa = 'CAMARA') DESC,` : Prisma.empty;
   const linhas = await db.$queryRaw<LinhaLei[]>`
     WITH v AS (
@@ -214,7 +228,7 @@ export async function listarLeis(aba: Aba, { offset = 0, limite = POR_ABA, ano =
       LIMIT ${limite} OFFSET ${offset}
     )
     SELECT p.id, p.casa::text AS casa, p."siglaTipo", p.numero, p.ano, p.ementa, p.situacao, p."virouLei", p."normaJuridica",
-           p."vigenciaFim", p."prorrogada", p."dataApresentacao",
+           p."vigenciaFim", p."prorrogada", p."dataApresentacao", p."orgaoAtual", p."dataUltimaTramitacao",
            a.nome AS "autorNome", a.tipo AS "autorTipo", a."parlamentarId" AS "autorParlamentarId",
            pa.partido AS "autorPartido", pa.uf AS "autorUf",
            (SELECT count(*)::int FROM "Autor" WHERE "proposicaoId" = p.id) AS "totalAutores",
@@ -275,6 +289,13 @@ export async function listarLeis(aba: Aba, { offset = 0, limite = POR_ABA, ano =
               prorrogada: p.prorrogada,
               apresentadaIso: p.dataApresentacao ? p.dataApresentacao.toISOString() : null,
               creditoExtraordinario: ehCreditoExtraordinario(p.ementa),
+            }
+          : null,
+      pec:
+        aba === "pecs"
+          ? {
+              orgaoAtual: p.orgaoAtual,
+              ultimaMovimentacaoIso: p.dataUltimaTramitacao ? p.dataUltimaTramitacao.toISOString() : null,
             }
           : null,
       destaque: d && {
@@ -367,6 +388,9 @@ export async function buscarLei(id: number) {
       normaJuridica: p.normaJuridica,
       urlInteiroTeor: p.urlInteiroTeor,
       dataApresentacaoIso: p.dataApresentacao ? p.dataApresentacao.toISOString() : null,
+      orgaoAtual: p.orgaoAtual,
+      ultimaMovimentacaoIso: p.dataUltimaTramitacao ? p.dataUltimaTramitacao.toISOString() : null,
+      idOrigem: p.idOrigem,
       dataLeiIso: p.dataLei ? p.dataLei.toISOString() : null,
       vigenciaFimIso: p.vigenciaFim ? p.vigenciaFim.toISOString() : null,
       prorrogada: p.prorrogada,
@@ -398,7 +422,7 @@ export async function resumoLegislativo(parlamentarId: number, ano: number) {
     nominaisDe("CAMARA"),
     nominaisDe("SENADO"),
     db.voto.count({ where: { parlamentarId, voto: { notIn: SEM_VOTO }, votacao: doAno } }),
-    db.autor.count({ where: { parlamentarId } }),
+    db.autor.count({ where: { parlamentarId, proposicao: { votacoes: { some: {} } } } }),
   ]);
   return { nominais: { CAMARA: camara, SENADO: senado }, votou, autorias };
 }
@@ -411,15 +435,18 @@ export interface AutorDeLei {
   casa: "CAMARA" | "SENADO";
 }
 
-// Parlamentares que constam como autores de alguma proposição que aparece em Leis (tem votação). Alimenta o filtro por
+// Parlamentares que constam como autores de alguma proposição que aparece em Leis (tem votação, ou é PEC em andamento). Alimenta o filtro por
 // autor da tela. Autoria de órgão (comissão, Executivo) não entra: não é parlamentar. Pode incluir quem já saiu do cargo.
 export async function listarAutoresDeLeis(): Promise<AutorDeLei[]> {
   return db.$queryRaw<AutorDeLei[]>`
     SELECT pa.id, pa.nome, pa.partido, pa.uf::text AS uf, pa.casa::text AS casa
     FROM "Parlamentar" pa
     WHERE EXISTS (
-      SELECT 1 FROM "Autor" a JOIN "Votacao" v ON v."proposicaoId" = a."proposicaoId"
+      SELECT 1 FROM "Autor" a JOIN "Proposicao" p ON p.id = a."proposicaoId"
       WHERE a."parlamentarId" = pa.id
+        AND (EXISTS (SELECT 1 FROM "Votacao" v WHERE v."proposicaoId" = p.id)
+             OR (p.casa = 'CAMARA' AND p."siglaTipo" = 'PEC' AND p.situacao IS NOT NULL
+                 AND btrim(p.situacao) <> ALL(${SITUACOES_ENCERRADAS}::text[])))
     )
     ORDER BY pa.nome ASC, pa.id ASC`;
 }

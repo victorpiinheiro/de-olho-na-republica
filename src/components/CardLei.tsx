@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Placar } from "@/components/Placar";
 import { StatusLei } from "@/components/StatusLei";
 import { dataBr, dataBrDia } from "@/lib/format";
-import { NOME_CASA, rotuloResultado } from "@/lib/leis";
+import { NOME_CASA, rotuloOrgao, rotuloResultado } from "@/lib/leis";
 import type { CardLei as Card } from "@/lib/queries/leis";
 
 const NA_CASA = { CAMARA: "na Câmara", SENADO: "no Senado" } as const;
@@ -31,6 +31,22 @@ export function CardLei({ lei }: { lei: Card }) {
               {lei.mp.prorrogada ? " (prorrogado)" : ""}
             </>
           )}
+        </p>
+      )}
+
+      {lei.pec && (
+        <p className="lei-votacao">
+          {lei.pec.orgaoAtual && (
+            <>
+              Onde está: <strong>{rotuloOrgao(lei.pec.orgaoAtual)}</strong>
+            </>
+          )}
+          {lei.pec.ultimaMovimentacaoIso && (
+            <>
+              {lei.pec.orgaoAtual ? " · " : ""}Última movimentação em {dataBrDia(lei.pec.ultimaMovimentacaoIso)}
+            </>
+          )}
+          {!d && <>{lei.pec.orgaoAtual || lei.pec.ultimaMovimentacaoIso ? " · " : ""}Ainda sem votação em plenário</>}
         </p>
       )}
 
